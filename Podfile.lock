@@ -1,0 +1,100 @@
+PODS:
+  - Alamofire (4.9.1)
+  - AlamofireImage (3.6.0):
+    - Alamofire (~> 4.9)
+  - Charts (3.4.0):
+    - Charts/Core (= 3.4.0)
+  - Charts/Core (3.4.0)
+  - ChartsRealm (3.4.0):
+    - Charts (~> 3.4.0)
+    - RealmSwift (~> 3.18.0)
+  - Differentiator (4.0.1)
+  - ObjectMapper (3.5.1)
+  - Realm (3.18.0):
+    - Realm/Headers (= 3.18.0)
+  - Realm/Headers (3.18.0)
+  - RealmSwift (3.18.0):
+    - Realm (= 3.18.0)
+  - RxBiBinding (0.2.5):
+    - RxCocoa (~> 5.0)
+    - RxSwift (~> 5.0)
+  - RxCocoa (5.0.1):
+    - RxRelay (~> 5)
+    - RxSwift (~> 5)
+  - RxDataSources (4.0.1):
+    - Differentiator (~> 4.0)
+    - RxCocoa (~> 5.0)
+    - RxSwift (~> 5.0)
+  - RxRealm (1.0.0):
+    - RealmSwift (~> 3.14)
+    - RxSwift (~> 5.0)
+  - RxRelay (5.0.1):
+    - RxSwift (~> 5)
+  - RxSwift (5.0.1)
+  - SnapKit (5.0.1)
+  - SteamLogin (0.1.4):
+    - SteamLogin/Login (= 0.1.4)
+  - SteamLogin/Login (0.1.4)
+  - SVProgressHUD (2.2.5)
+  - XLPagerTabStrip (9.0.0)
+
+DEPENDENCIES:
+  - Alamofire
+  - AlamofireImage
+  - Charts
+  - ChartsRealm
+  - ObjectMapper
+  - RealmSwift
+  - RxBiBinding
+  - RxDataSources
+  - RxRealm
+  - RxSwift
+  - SnapKit
+  - SteamLogin
+  - SVProgressHUD
+  - XLPagerTabStrip
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Alamofire
+    - AlamofireImage
+    - Charts
+    - ChartsRealm
+    - Differentiator
+    - ObjectMapper
+    - Realm
+    - RealmSwift
+    - RxBiBinding
+    - RxCocoa
+    - RxDataSources
+    - RxRealm
+    - RxRelay
+    - RxSwift
+    - SnapKit
+    - SteamLogin
+    - SVProgressHUD
+    - XLPagerTabStrip
+
+SPEC CHECKSUMS:
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  AlamofireImage: be9963c6582d68b39e89191f64c82a7d7bf40fdd
+  Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
+  ChartsRealm: 2ae8bf478211a94b3b6dd20738db0b9b132eb66b
+  Differentiator: 886080237d9f87f322641dedbc5be257061b0602
+  ObjectMapper: 70187b8941977c62ccfb423caf6b50be405cabf0
+  Realm: 7b3d04740facf45e958a514b466a32b04f1113d6
+  RealmSwift: c817b5f374668cf08f649afb05f55d92a787649c
+  RxBiBinding: 6cc627d9e0dfa0b2ce8470cd7e539f3cb100f782
+  RxCocoa: e741b9749968e8a143e2b787f1dfbff2b63d0a5c
+  RxDataSources: efee07fa4de48477eca0a4611e6d11e2da9c1114
+  RxRealm: 1e81dcfca1fb50c3e9b3e1f8102bc875c5156a2e
+  RxRelay: 89d54507f4fd4d969e6ec1d4bd7f3673640b4640
+  RxSwift: e2dc62b366a3adf6a0be44ba9f405efd4c94e0c4
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  SteamLogin: 86eee7733cfaa417242671524f39561b0c22700c
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
+
+PODFILE CHECKSUM: 6fdf774066362298fe00df8838bb630f421ccea2
+
+COCOAPODS: 1.8.4
