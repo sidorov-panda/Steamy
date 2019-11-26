@@ -1,5 +1,5 @@
 //
-//  Game.swift
+//  UserGame.swift
 //  Steamy
 //
 //  Created by Alexey Sidorov on 24.11.2019.
@@ -9,7 +9,7 @@
 import Foundation
 import ObjectMapper
 
-class Game: Mappable {
+class UserGame: Mappable {
 
   // MARK: -
 

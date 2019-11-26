@@ -7,7 +7,7 @@ target 'Steamy' do
   pod 'Alamofire'
   pod 'AlamofireImage'
   pod 'RxSwift'
-	pod 'RxBiBinding'
+#	pod 'RxBiBinding'
   pod 'RxDataSources'
   pod "RxRealm"
   pod 'ObjectMapper'
@@ -17,6 +17,6 @@ target 'Steamy' do
   pod 'Charts'
   pod 'ChartsRealm'
   pod 'SVProgressHUD'
-  pod 'SteamLogin'
   pod 'XLPagerTabStrip'
+  pod 'ImageSlideshow', '~> 1.8.1'
 end

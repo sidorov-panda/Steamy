@@ -59,7 +59,7 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
       .subscribe(onNext: { [weak self] (userId) in
         Session.shared.userId = userId
         if let userViewController = UserRouter.userViewController(with: userId) {
-          self?.showProfileSubject.onNext(userViewController)
+          self?.showProfileSubject.onNext(UINavigationController(rootViewController: userViewController))
         }
       }).disposed(by: disposeBag)
 
@@ -69,7 +69,7 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
         if
           let userId = Session.shared.userId,
           let userViewController = UserRouter.userViewController(with: userId) {
-          self?.showProfileSubject.onNext(userViewController)
+          self?.showProfileSubject.onNext(UINavigationController(rootViewController: userViewController))
         } else {
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self?.showLoginSubject.onNext(())

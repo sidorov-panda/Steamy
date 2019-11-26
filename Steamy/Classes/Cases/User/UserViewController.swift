@@ -28,18 +28,9 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
 
   func bind() {
     userInfoView.configure(item: viewModel.output.userInfoItem())
-
-//    viewModel
-//      .output
-//      .sections
-//      .bind(to: tableView.rx.items(dataSource: rxDataSource!))
-//      .disposed(by: disposeBag)
-
   }
 
   // MARK: -
-
-  var rxDataSource: RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>?
 
   override func viewDidLoad() {
     self.containerView = self.scrollView
@@ -63,24 +54,7 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
     super.viewDidLoad()
 
     configureUI()
-
-//    rxDataSource = RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>(
-//      configureCell: { [weak self] dataSource, tableView, indexPath, sm in
-//
-//        guard
-//          let item = try? dataSource.model(at: indexPath) as? BaseCellItem,
-//          let cell = tableView.dequeueReusableCell(withIdentifier: item.reuseIdentifier) as? ConfigurableCell else {
-//            return UITableViewCell()
-//        }
-//        cell.configure(item: item)
-//        return cell
-//    })
-
-//    rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
-//                                                                  reloadAnimation: .automatic,
-//                                                                  deleteAnimation: .automatic)
     bind()
-//    tableView.rx.setDelegate(self).disposed(by: disposeBag)
   }
 
   // MARK: -
@@ -120,6 +94,6 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
   }
 
   override public func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {
-    return [ProfileViewController(), ActivityViewController(), FriendsViewController(), ProfileViewController(), ProfileViewController()]
+    return viewModel.output.userPages()
   }
 }

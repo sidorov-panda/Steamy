@@ -49,7 +49,7 @@ class UserInfoView: UIView {
       if let url = url {
         let filter = AspectScaledToFillSizeWithRoundedCornersFilter(
           size: self.avatarImageView.frame.size,
-          radius: self.avatarImageView.frame.size.height/2
+          radius: 10
         )
         self.avatarImageView.af_setImage(
           withURL: url,
@@ -68,16 +68,21 @@ class UserInfoView: UIView {
   func configureSubviews() {
     levelLabel = UILabel()
     levelLabel.text = ""
+    levelLabel.textColor = .white
     addSubview(levelLabel)
 
     nameLabel = UILabel()
     nameLabel.text = ""
+    nameLabel.textColor = .white
     addSubview(nameLabel)
 
     avatarImageView = UIImageView()
+    avatarImageView.layer.cornerRadius = 10
+    avatarImageView.backgroundColor = .clear
     addSubview(avatarImageView)
-    
+
     locationLabel = UILabel()
+    locationLabel.textColor = .white
     addSubview(locationLabel)
 
     avatarImageView.snp.makeConstraints { (maker) in
@@ -105,5 +110,4 @@ class UserInfoView: UIView {
     }
 
   }
-
 }

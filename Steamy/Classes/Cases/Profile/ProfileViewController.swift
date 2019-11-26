@@ -9,6 +9,8 @@
 import UIKit
 import RxSwift
 import XLPagerTabStrip
+import RxDataSources
+import SnapKit
 
 class ProfileViewController: BaseViewController, ControllerProtocol {
 
@@ -24,10 +26,78 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
+  var tableView = UITableView()
+
+  // MARK: -
+
+  var rxDataSource: RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>?
+
   override func viewDidLoad() {
     super.viewDidLoad()
+
     self.view.backgroundColor = .defaultBackgroundColor
+    configureUI()
+
+    registerCells()
+
+    rxDataSource = RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>(
+      configureCell: { dataSource, tableView, indexPath, sm in
+        guard
+          let item = try? dataSource.model(at: indexPath) as? BaseCellItem,
+          let cell = tableView.dequeueReusableCell(withIdentifier: item.reuseIdentifier) as? ConfigurableCell else {
+            return UITableViewCell()
+        }
+        cell.configure(item: item)
+        return cell
+    })
+
+    rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
+                                                                  reloadAnimation: .automatic,
+                                                                  deleteAnimation: .automatic)
+
+    bind()
   }
+
+  func configureUI() {
+    self.view.addSubview(tableView)
+
+    tableView.snp.makeConstraints({ (maker) in
+      maker.leading.equalTo(self.view)
+      maker.top.equalTo(self.view)
+      maker.right.equalTo(self.view)
+      maker.bottom.equalTo(self.view)
+    })
+  }
+
+  func registerCells() {
+    tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
+    tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+  }
+
+  func bind() {
+    //Output
+    viewModel
+      .output
+      .sections
+      .bind(to: tableView.rx.items(dataSource: rxDataSource!))
+      .disposed(by: disposeBag)
+
+    viewModel
+      .output
+      .showController
+      .subscribe(onNext: { [weak self] (viewController) in
+        self?.navigationController?.pushViewController(viewController, animated: true)
+      }).disposed(by: disposeBag)
+
+    //Input
+    tableView
+      .rx
+      .itemSelected
+      .asDriver()
+      .drive(viewModel.input.didTapCell)
+      .disposed(by: disposeBag)
+  }
+
 }
 
 extension ProfileViewController: IndicatorInfoProvider {

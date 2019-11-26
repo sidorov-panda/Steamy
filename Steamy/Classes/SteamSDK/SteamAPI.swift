@@ -9,6 +9,7 @@
 import Foundation
 
 fileprivate let SteamAPIBaseURLString = "http://api.steampowered.com"
+fileprivate let SteamStoreAPIBaseURLString = "https://store.steampowered.com"
 fileprivate let SteamAPIKey = "100170AD8C821B6B6948EA460DD9F89D"
 
 class SteamAPI {
@@ -36,9 +37,18 @@ class SteamAPI {
     case ownedGames(userId: Int)
     case recentlyPlayedGames(userId: Int)
     case gameStats(userId: Int, gameId: Int)
+    case gameInfo(gameId: Int)
+    case achievements(userId: Int, gameId: Int)
 
     func url() -> URL? {
-      var components = URLComponents(string: SteamAPIBaseURLString)
+      var components: URLComponents?
+      switch self {
+      case .gameInfo(_):
+        components = URLComponents(string: SteamStoreAPIBaseURLString)
+      default:
+        components = URLComponents(string: SteamAPIBaseURLString)
+      }
+
       components?.path = self.URLPath()
       components?.queryItems = self.queryItems()
       return components?.url
@@ -50,11 +60,11 @@ class SteamAPI {
       case .user(_), .users(_):
         path += "ISteamUser/GetPlayerSummaries"
         break
-      
+
       case .ownedGames(_):
         path += "IPlayerService/GetOwnedGames"
         break
-        
+
       case .recentlyPlayedGames(_):
         path += "IPlayerService/GetRecentlyPlayedGames"
         break
@@ -62,10 +72,17 @@ class SteamAPI {
       case .userLevel(_):
         path += "IPlayerService/GetSteamLevel"
         break
-        
+
       case .gameStats(_, _):
         path += "ISteamUserStats/GetUserStatsForGame"
         break
+
+      case .gameInfo(_):
+        path += "api/appdetails"
+        break
+
+      case .achievements(_, _):
+        path += "ISteamUserStats/GetPlayerAchievements"
       }
       path.append("/\(self.APIVersion())/")
       return path
@@ -73,16 +90,14 @@ class SteamAPI {
 
     private func APIVersion() -> String {
       switch self {
-      case .user(_), .users(_):
+      case .user(_), .users(_), .gameStats(_, _):
         return "v0002"
-      case .ownedGames(_):
-        return "v0001"
-      case .recentlyPlayedGames(_):
+      case .ownedGames(_), .achievements(_, _), .recentlyPlayedGames(_):
         return "v0001"
       case .userLevel(_):
         return "v1"
-      case .gameStats(_, _):
-        return "v0002"
+      case .gameInfo(_):
+        return ""
       }
     }
 
@@ -106,6 +121,11 @@ class SteamAPI {
       case .userLevel(let id):
         ret.append(URLQueryItem(name: "steamid", value: String(id)))
       case .gameStats(let userId, let gameId):
+        ret.append(URLQueryItem(name: "steamid", value: String(userId)))
+        ret.append(URLQueryItem(name: "appid", value: String(gameId)))
+      case .gameInfo(let gameId):
+        ret.append(URLQueryItem(name: "appids", value: String(gameId)))
+      case .achievements(let userId, let gameId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
         ret.append(URLQueryItem(name: "appid", value: String(gameId)))
       }

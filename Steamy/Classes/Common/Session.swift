@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import RxSwift
 
 class Session {
 
@@ -16,4 +17,5 @@ class Session {
 
   @UserDefault("userId", defaultValue: nil)
   var userId: Int?// = 76561198072598020
+
 }

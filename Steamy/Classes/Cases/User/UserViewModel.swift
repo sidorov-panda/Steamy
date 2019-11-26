@@ -23,6 +23,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
 
   struct Output {
     var userInfoItem: () -> (UserInfoViewItem)
+    var userPages: () -> ([UIViewController])
   }
 
   var input: UserViewModel.Input!
@@ -43,6 +44,13 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
                             avatarObservable: self.avatarSubject.asObservable())
   }
 
+  func userViewControllers() -> [UIViewController] {
+    guard let profileVC = ProfileRouter.profileViewController(with: userId) else {
+      return []
+    }
+    return [profileVC, ActivityViewController(), FriendsViewController(), ProfileViewController(), ProfileViewController()]
+  }
+
   // MARK: -
 
   var userId: Int
@@ -54,16 +62,14 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
     super.init()
 
     self.input = Input()
-    self.output = Output(userInfoItem: self.userInfoViewItem)
+    self.output = Output(userInfoItem: self.userInfoViewItem,
+                         userPages: self.userViewControllers)
 
     loadUserData()
   }
 
   private func loadUserData() {
-    self.dependencies.userManager.user(id: Session.shared.userId!) { (user, error) in
-      print(user)
-      print(error)
-
+    self.dependencies.userManager.user(id: userId) { (user, error) in
       if let user = user {
         self.nameSubject.onNext(user.nickname)
         self.locationSubject.onNext(user.countryCode)
@@ -71,17 +77,17 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
       }
     }
 
-    self.dependencies.userManager.games(userId: Session.shared.userId!) { (games, error) in
-      print(games)
-      print(error)
-    }
+//    self.dependencies.userManager.games(userId: Session.shared.userId!) { (games, error) in
+//      print(games)
+//      print(error)
+//    }
 
-    self.dependencies.userManager.recentlyPlayedGames(userId: Session.shared.userId!) { (games, error) in
-      print(games)
-      print(error)
-    }
+//    self.dependencies.userManager.recentlyPlayedGames(userId: Session.shared.userId!) { (games, error) in
+//      print(games)
+//      print(error)
+//    }
 
-    self.dependencies.userManager.level(userId: Session.shared.userId!) { (level, error) in
+    self.dependencies.userManager.level(userId: userId) { (level, error) in
       print(level)
       print(error)
 

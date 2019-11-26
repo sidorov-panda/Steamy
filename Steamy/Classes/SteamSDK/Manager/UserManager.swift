@@ -15,6 +15,7 @@ protocol UserManagerProviderProtocol {
   func ownedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func recentlyPlayedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
+  func achievementsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)
 }
 
 class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
@@ -51,6 +52,12 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
 
   func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?) {
     steamAPI.request(.userLevel(id: userId)) { (response, error) in
+      completion?(response, error)
+    }
+  }
+
+  func achievementsData(with userId: Int, gameId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
+    steamAPI.request(.achievements(userId: userId, gameId: gameId)) { (response, error) in
       completion?(response, error)
     }
   }
@@ -100,10 +107,10 @@ class UserManager {
     }
   }
 
-  func games(userId: Int, completion: (([Game]?, Error?) -> ())?) {
+  func games(userId: Int, completion: (([UserGame]?, Error?) -> ())?) {
     //Transforming into User Model
     self.provider.ownedGamesData(with: userId) { (response, error) in
-      var games: [Game]?
+      var games: [UserGame]?
       var err: Error?
 
       defer {
@@ -118,17 +125,17 @@ class UserManager {
       if
         let response = response?["response"] as? [String: Any],
         let gamesArray = response["games"] as? [[String: Any]] {
-          games = Mapper<Game>().mapArray(JSONArray: gamesArray)
+          games = Mapper<UserGame>().mapArray(JSONArray: gamesArray)
       } else {
-        err = UserManagerError.noUser
+        err = UserManagerError.wrongResponse
       }
     }
   }
 
-  func recentlyPlayedGames(userId: Int, completion: (([Game]?, Error?) -> ())?) {
+  func recentlyPlayedGames(userId: Int, completion: (([UserGame]?, Error?) -> ())?) {
     //Transforming into User Model
     self.provider.recentlyPlayedGamesData(with: userId) { (response, error) in
-      var games: [Game]?
+      var games: [UserGame]?
       var err: Error?
 
       defer {
@@ -143,9 +150,9 @@ class UserManager {
       if
         let response = response?["response"] as? [String: Any],
         let gamesArray = response["games"] as? [[String: Any]] {
-          games = Mapper<Game>().mapArray(JSONArray: gamesArray)
+          games = Mapper<UserGame>().mapArray(JSONArray: gamesArray)
       } else {
-        err = UserManagerError.noUser
+        err = UserManagerError.wrongResponse
       }
     }
   }
@@ -159,6 +166,11 @@ class UserManager {
         completion?(level, err)
       }
 
+      guard error == nil else {
+        err = error
+        return
+      }
+
       if
         let response = response?["response"] as? [String: Int],
         let lev = response["player_level"] {
@@ -168,7 +180,7 @@ class UserManager {
       }
     }
   }
-  
+
   func statItems(userId: Int, gameId: Int, completion: ((Int?, Error?) -> ())?) {
     self.provider.level(with: userId) { (response, error) in
       var level: Int?
@@ -177,11 +189,36 @@ class UserManager {
       defer {
         completion?(level, err)
       }
+      
+      guard error == nil else {
+        err = error
+        return
+      }
 
       if
         let response = response?["response"] as? [String: Int],
         let lev = response["player_level"] {
           level = lev
+      } else {
+        err = UserManagerError.wrongResponse
+      }
+    }
+  }
+
+  func achievements(userId: Int, gameId: Int, completion: (([UserAchievement]?, Error?) -> ())?) {
+    self.provider.achievementsData(with: userId, gameId: gameId) { (response, error) in
+
+      var err: Error?
+      var achievments: [UserAchievement]?
+
+      defer {
+        completion?(achievments, err)
+      }
+
+      if
+        let response = response?["playerstats"] as? [String: Any],
+        let data = response["achievements"] as? [[String: Any]] {
+          achievments = Mapper<UserAchievement>().mapArray(JSONArray: data)
       } else {
         err = UserManagerError.wrongResponse
       }

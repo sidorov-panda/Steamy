@@ -20,6 +20,13 @@ protocol ControllerProtocol: class {
 
 class BaseViewController: UIViewController {
 
-  var disposeBag = DisposeBag()
+  override func viewDidLoad() {
+    super.viewDidLoad()
 
+    self.navigationController?.navigationBar.backItem?.title = " "
+    self.extendedLayoutIncludesOpaqueBars = true
+    self.edgesForExtendedLayout = UIRectEdge.bottom
+  }
+
+  var disposeBag = DisposeBag()
 }

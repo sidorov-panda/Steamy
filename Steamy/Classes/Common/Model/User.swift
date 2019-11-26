@@ -8,23 +8,24 @@
 
 import Foundation
 import ObjectMapper
+import RealmSwift
 
-class User: Mappable {
+class User: Object, Mappable {
 
   // MARK: -
 
-  var steamid: Int?
-  var avatarURL: URL?
-  var name: String?
-  var nickname: String?
-  var countryCode: String?
-  var stateCode: String?
-  var cityCode: Int?
+  dynamic var steamid: Int?
+  dynamic var avatarURL: URL?
+  dynamic var name: String?
+  dynamic var nickname: String?
+  dynamic var countryCode: String?
+  dynamic var stateCode: String?
+  dynamic var cityCode: Int?
 
   // MARK: - Mappable
 
-  required init?(map: Map) {
-    
+  required convenience init?(map: Map) {
+    self.init()
   }
 
   func mapping(map: Map) {
