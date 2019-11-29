@@ -1,21 +1,20 @@
 //
-//  GameCell.swift
+//  FriendCell.swift
 //  Steamy
 //
-//  Created by Alexey Sidorov on 24.11.2019.
+//  Created by Alexey Sidorov on 27.11.2019.
 //  Copyright © 2019 Alexey Sidorov. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import AlamofireImage
 
-class GameCellItem: BaseCellItem {
+class FriendCellItem: BaseCellItem {
   var name: String?
-  var logoURL: URL?
-  var iconURL: URL?
+  var avatarURL: URL?
 }
 
-class GameCell: BaseCell {
+class FriendCell: BaseCell {
 
   // MARK: -
 
@@ -32,13 +31,13 @@ class GameCell: BaseCell {
   override func configure(item: BaseCellItem) {
     super.configure(item: item)
 
-    guard let item = item as? GameCellItem else {
+    guard let item = item as? FriendCellItem else {
      return
     }
 
     self.textLabel?.text = item.name
     self.textLabel?.textColor = .black
-    if let imageURL = item.iconURL {
+    if let imageURL = item.avatarURL {
       self.imageView?.af_setImage(withURL: imageURL)
     }
   }

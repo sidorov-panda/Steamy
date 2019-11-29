@@ -9,13 +9,13 @@
 import Foundation
 import ObjectMapper
 
-class UserAchievement: Mappable {
+class GameAchievement: Mappable {
 
   // MARK: -
 
-  var name: String?
-  var achieved: Bool = false
-  var unlockTime: Int?
+ dynamic var name: String?
+ dynamic var achieved: Bool = false
+ dynamic var unlockTime: Int?
 
   // MARK: - Mappable
 

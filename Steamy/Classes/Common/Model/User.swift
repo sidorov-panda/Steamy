@@ -10,7 +10,7 @@ import Foundation
 import ObjectMapper
 import RealmSwift
 
-class User: Object, Mappable {
+class User: Mappable {
 
   // MARK: -
 
@@ -29,7 +29,7 @@ class User: Object, Mappable {
   }
 
   func mapping(map: Map) {
-    steamid <- map["steamid"]
+    steamid <- (map["steamid"], JSONStringToIntTransform())
     avatarURL <- (map["avatarfull"], URLTransform())
     name <- map["realname"]
     nickname <- map["personaname"]
@@ -37,4 +37,41 @@ class User: Object, Mappable {
     stateCode <- map["locstatecode"]
     cityCode <- map["loccityid"]
   }
+
+  // MARK: -
 }
+
+class UserDB: Object {
+
+  //Realm-use only
+  @objc dynamic var steamidPk: String?
+
+  // MARK: -
+
+  @objc dynamic var name: String?
+  @objc dynamic var avatarURL: String?
+  @objc dynamic var nickname: String?
+  @objc dynamic var countryCode: String?
+  @objc dynamic var stateCode: String?
+  dynamic var cityCode = RealmOptional<Int>()
+
+  // MARK: -
+
+  override class func primaryKey() -> String? {
+    return "steamidPk"
+  }
+}
+
+class FriendDB: Object {
+
+  //Realm-use only
+  @objc dynamic var steamidPk: String?
+  @objc dynamic var userId: String?
+
+  // MARK: -
+
+  override class func primaryKey() -> String? {
+    return "steamidPk"
+  }
+}
+

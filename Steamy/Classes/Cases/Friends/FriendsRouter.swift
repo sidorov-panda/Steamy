@@ -10,10 +10,35 @@ import UIKit
 
 class FriendsRouter: BaseRouter {
 
-  static var patterns: [String] = []
-
-  static func viewController(path: [String], param: [String : Any]) -> UIViewController? {
-    return nil
+  static var patterns: [String] {
+    return ["friends"]
   }
 
+  static func viewController(path: [String], param: [String : Any]) -> UIViewController? {
+    guard
+      let idParam = param["id"] as? String,
+      let userId = Int(idParam) else {
+        return nil
+    }
+    return FriendsRouter.friendsViewController(with: userId)
+  }
+
+  static func friendsViewController(with userId: Int) -> UIViewController? {
+    var provider: UserManagerProviderProtocol
+    if userId == Session.shared.userId {
+      provider = UserManagerRealmProvider()
+    } else {
+      provider = UserManagerSteamAPIProvider()
+    }
+
+    let userManager = UserManager(provider: provider)
+    guard
+      let friendsViewModel = FriendsViewModel(userId: userId,
+                                              dependencies: FriendsViewModelDependency(userManager: userManager)) else {
+        return nil
+    }
+    let friendsVC = FriendsViewController()
+    friendsVC.configure(with: friendsViewModel)
+    return friendsVC
+  }
 }

@@ -33,6 +33,7 @@ class SteamAPI {
   enum Method {
     case user(id: Int)
     case users(ids: [Int])
+    case friends(userId: Int)
     case userLevel(id: Int)
     case ownedGames(userId: Int)
     case recentlyPlayedGames(userId: Int)
@@ -83,6 +84,8 @@ class SteamAPI {
 
       case .achievements(_, _):
         path += "ISteamUserStats/GetPlayerAchievements"
+      case .friends(_):
+        path += "ISteamUser/GetFriendList"
       }
       path.append("/\(self.APIVersion())/")
       return path
@@ -92,7 +95,7 @@ class SteamAPI {
       switch self {
       case .user(_), .users(_), .gameStats(_, _):
         return "v0002"
-      case .ownedGames(_), .achievements(_, _), .recentlyPlayedGames(_):
+      case .ownedGames(_), .achievements(_, _), .recentlyPlayedGames(_), .friends(_):
         return "v0001"
       case .userLevel(_):
         return "v1"
@@ -128,6 +131,8 @@ class SteamAPI {
       case .achievements(let userId, let gameId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
         ret.append(URLQueryItem(name: "appid", value: String(gameId)))
+      case .friends(let userId):
+        ret.append(URLQueryItem(name: "steamid", value: String(userId)))
       }
       return ret
     }

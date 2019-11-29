@@ -22,7 +22,7 @@ class UserRouter: BaseRouter {
     }
     return UserRouter.userViewController(with: userId)
   }
-  
+
   static func userViewController(with userId: Int) -> UIViewController? {
 
     let steamAPI = UserManagerSteamAPIProvider()

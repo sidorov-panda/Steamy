@@ -12,7 +12,7 @@ class ProfileRouter: BaseRouter {
 
   static var patterns: [String] = []
 
-  static func viewController(path: [String], param: [String : Any]) -> UIViewController? {
+  static func viewController(path: [String], param: [String: Any]) -> UIViewController? {
     guard
       let idParam = param["id"] as? String,
       let userId = Int(idParam) else {
@@ -26,6 +26,7 @@ class ProfileRouter: BaseRouter {
     let userManager = UserManager(provider: steamAPI)
     guard
       let userViewModel = ProfileViewModel(userId: userId,
+                                           favoriteGameid: Session.shared.userId == userId ? Session.shared.gameId : nil,
                                            dependencies: ProfileViewModelDependency(userManager: userManager)) else {
         return nil
     }

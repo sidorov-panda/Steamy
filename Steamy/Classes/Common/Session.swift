@@ -18,4 +18,9 @@ class Session {
   @UserDefault("userId", defaultValue: nil)
   var userId: Int?// = 76561198072598020
 
+  /// Don't change!
+  /// This value is static and relates to CS: GO App.
+  var gameId: Int = 730
+
+  var friendList: [Int] = []
 }

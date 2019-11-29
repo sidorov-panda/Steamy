@@ -16,17 +16,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-    SteamLogin.steamApiKey = "100170AD8C821B6B6948EA460DD9F89D"
+    SteamLogin.steamApiKey = AppConfig.shared.steamAPIKey
 
     //!!!!!REMOVE BEFORE BUILD!!!!
     Session.shared.userId = 76561197960434622
-
+    
     if let rootVC = UIApplication.shared.windows.first?.rootViewController as? RootViewController {
       let rootViewModel = RootViewModel()
       rootVC.configure(with: rootViewModel)
     }
-    
+
     appearance()
+    collectData()
 		return true
 	}
 
@@ -46,4 +47,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     UINavigationBar.appearance().isTranslucent = true
   }
 
+  func collectData() {
+    let collector = AppManager()
+    collector.collectData()
+  }
 }

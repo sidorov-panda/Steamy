@@ -38,10 +38,12 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: -
 
   var userId: Int
+  var favoriteGameid: Int?
   var dependencies: ProfileViewModelDependency
 
-  init?(userId: Int, dependencies: ProfileViewModelDependency) {
+  init?(userId: Int, favoriteGameid: Int? = nil, dependencies: ProfileViewModelDependency) {
     self.userId = userId
+    self.favoriteGameid = favoriteGameid
     self.dependencies = dependencies
 
     input = Input(didTapCell: didTapCellSubject.asObserver())
@@ -73,6 +75,7 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   func createSections() {
     var sctns = [BaseTableSectionItem]()
 
+    //showing the first 3 games with the greatest playtime
     var gameCells: [BaseCellItem] = Array(self.games.sorted(by: { (game1, game2) -> Bool in
       return (game1.playtime ?? 0) > (game2.playtime ?? 0)
     })[safe: 0..<3] ?? []).map { (game) -> GameCellItem in
@@ -91,8 +94,18 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       noGamesCell.title = "No games yet"
       gameCells.append(noGamesCell)
     }
+
+    if let favoriteGameid = favoriteGameid {
+      let favoriteGame = FavoriteGameCellItem(reuseIdentifier: "FavoriteGameCell",
+                                              identifier: "FavoriteGame_\(favoriteGameid)")
+      favoriteGame.image = UIImage(named: "favoriteGameLogo")
+      let favoriteSection = BaseTableSectionItem(header: "Favorite Game", items: [favoriteGame])
+      sctns.append(favoriteSection)
+    }
+
     let section = BaseTableSectionItem(header: "Games", items: gameCells)
-    sectionsRelay.accept([section])
+    sctns.append(section)
+    sectionsRelay.accept(sctns)
   }
 
   // MARK: -
@@ -101,7 +114,7 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
     guard let section = self.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
       return
     }
-    if section.identifier.starts(with: "GameCell") {
+    if section.identifier.starts(with: "GameCell") || section.identifier.starts(with: "FavoriteGame") {
       //show
       guard
         let gameId = Int(section.identifier.split(separator: "_").last ?? ""),

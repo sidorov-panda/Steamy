@@ -59,7 +59,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     }
   }
 
-  var achievments: [UserAchievement] = []
+  var achievments: [GameAchievement] = []
 
   init?(userId: Int, gameId: Int, dependencies: GameViewModelDependency) {
     self.userId = userId

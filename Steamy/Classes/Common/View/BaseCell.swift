@@ -9,6 +9,7 @@
 import UIKit
 import RxSwift
 import RxDataSources
+import AlamofireImage
 
 protocol Configurable where Self: UITableViewCell {
   func configure(item: BaseCellItem)
@@ -18,6 +19,7 @@ typealias ConfigurableCell = UITableViewCell & Configurable
 
 public class BaseCellItem: IdentifiableType, Equatable {
 
+  ///Academicaly it's no good to store reuse here, it's better to have it in some kind of tableView managment structure, but for simplicity reasons
   let reuseIdentifier: String
   let identifier: String
 
@@ -65,6 +67,7 @@ class BaseCell: ConfigurableCell {
 
   override func prepareForReuse() {
     super.prepareForReuse()
+    ///clearing bag after reuse
     disposeBag = DisposeBag()
   }
 }

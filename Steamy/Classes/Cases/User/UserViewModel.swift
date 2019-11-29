@@ -45,10 +45,13 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   }
 
   func userViewControllers() -> [UIViewController] {
-    guard let profileVC = ProfileRouter.profileViewController(with: userId) else {
+    guard
+      let profileVC = ProfileRouter.profileViewController(with: userId),
+      let friendsVC = FriendsRouter.friendsViewController(with: userId)
+    else {
       return []
     }
-    return [profileVC, ActivityViewController(), FriendsViewController(), ProfileViewController(), ProfileViewController()]
+    return [profileVC, ActivityViewController(), friendsVC, ProfileViewController(), ProfileViewController()]
   }
 
   // MARK: -

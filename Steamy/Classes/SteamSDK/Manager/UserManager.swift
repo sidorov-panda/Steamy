@@ -9,64 +9,12 @@
 import Foundation
 import ObjectMapper
 
-protocol UserManagerProviderProtocol {
-  typealias JSONObject = [String: Any]
-  func userData(with userid: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func ownedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func recentlyPlayedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func achievementsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)
-}
-
-class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
-
-  //Using HTTP as a transport
-  let steamAPI = SteamAPI(httpClient: HTTPClient())
-
-  func userData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.user(id: id)) { (response, error) in
-
-      var resp: JSONObject?
-      var err: Error?
-
-      defer {
-        completion?(resp, err)
-      }
-
-      resp = response
-      err = error
-    }
-  }
-
-  func ownedGamesData(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.ownedGames(userId: userId)) { (response, error) in
-      completion?(response, error)
-    }
-  }
-
-  func recentlyPlayedGamesData(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.recentlyPlayedGames(userId: userId)) { (response, error) in
-      completion?(response, error)
-    }
-  }
-
-  func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.userLevel(id: userId)) { (response, error) in
-      completion?(response, error)
-    }
-  }
-
-  func achievementsData(with userId: Int, gameId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.achievements(userId: userId, gameId: gameId)) { (response, error) in
-      completion?(response, error)
-    }
-  }
-}
-
+/// Class is used to manage User's data
 class UserManager {
 
   enum UserManagerError: Error {
     case noUser
+    case noUserIds
     case wrongResponse
   }
 
@@ -103,6 +51,31 @@ class UserManager {
           user = mappedUser
       } else {
         err = UserManagerError.noUser
+      }
+    }
+  }
+
+  func users(ids: [Int], completion: (([User]?, Error?) -> ())?) {
+    //Transforming into User Model
+    self.provider.usersData(with: ids) { (response, error) in
+      var users: [User]?
+      var err: Error?
+
+      defer {
+        completion?(users, err)
+      }
+
+      guard error == nil else {
+        err = error
+        return
+      }
+
+      if
+        let response = response?["response"] as? [String: Any],
+        let usersArray = response["players"] as? [[String: Any]] {
+          users = Mapper<User>().mapArray(JSONArray: usersArray)
+      } else {
+        err = UserManagerError.wrongResponse
       }
     }
   }
@@ -181,35 +154,40 @@ class UserManager {
     }
   }
 
-  func statItems(userId: Int, gameId: Int, completion: ((Int?, Error?) -> ())?) {
-    self.provider.level(with: userId) { (response, error) in
-      var level: Int?
+  func gameStats(userId: Int, gameId: Int, completion: (([GameStat]?, [GameAchievement]?, Error?) -> ())?) {
+    self.provider.gameStatsData(with: userId, gameId: gameId) { (response, error) in
+      var stats: [GameStat]?
+      var achiev: [GameAchievement]?
       var err: Error?
 
       defer {
-        completion?(level, err)
+        completion?(stats, achiev, err)
       }
-      
+
       guard error == nil else {
         err = error
         return
       }
 
-      if
-        let response = response?["response"] as? [String: Int],
-        let lev = response["player_level"] {
-          level = lev
+      if let response = response?["playerstats"] as? [String: Any] {
+        if let userStats = response["stats"] as? [[String: Any]] {
+          stats = Mapper<GameStat>().mapArray(JSONArray: userStats)
+        }
+
+        if let achievements = response["achievements"] as? [[String: Any]] {
+          achiev = Mapper<GameAchievement>().mapArray(JSONArray: achievements)
+        }
       } else {
         err = UserManagerError.wrongResponse
       }
     }
   }
 
-  func achievements(userId: Int, gameId: Int, completion: (([UserAchievement]?, Error?) -> ())?) {
+  func achievements(userId: Int, gameId: Int, completion: (([GameAchievement]?, Error?) -> ())?) {
     self.provider.achievementsData(with: userId, gameId: gameId) { (response, error) in
 
       var err: Error?
-      var achievments: [UserAchievement]?
+      var achievments: [GameAchievement]?
 
       defer {
         completion?(achievments, err)
@@ -218,9 +196,42 @@ class UserManager {
       if
         let response = response?["playerstats"] as? [String: Any],
         let data = response["achievements"] as? [[String: Any]] {
-          achievments = Mapper<UserAchievement>().mapArray(JSONArray: data)
+          achievments = Mapper<GameAchievement>().mapArray(JSONArray: data)
       } else {
         err = UserManagerError.wrongResponse
+      }
+    }
+  }
+
+  func friends(userId: Int, completion: (([User]?, Error?) -> ())?) {
+    self.provider.friends(with: userId) { (response, error) in
+      if
+        let friendlist = response?["friendslist"] as? [String: Any],
+        let friends = friendlist["friends"] as? [[String: Any]] {
+
+          let userIds = friends.filter ({ (friendDict) -> Bool in
+            return ((friendDict["relationship"] as? String) ?? "") == "friend"
+          }).map { (friendDict) -> Int? in
+            return Int((friendDict["steamid"] as? String) ?? "")
+          }.filter { (val) -> Bool in
+            return val != nil
+          } as? [Int] ?? []
+
+          guard userIds.count > 0 else {
+            completion?(nil, UserManagerError.noUserIds)
+            return
+          }
+          //Not the best solution, but for simplicity purposes
+          self.users(ids: userIds) { (usersResponse, usersError) in
+            guard usersError == nil else {
+              completion?(usersResponse, usersError)
+              return
+            }
+            completion?(usersResponse, nil)
+          }
+      } else {
+        completion?(nil, UserManagerError.wrongResponse)
+        return
       }
     }
   }

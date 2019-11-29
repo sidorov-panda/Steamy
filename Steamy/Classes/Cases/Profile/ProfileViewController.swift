@@ -49,6 +49,11 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
         }
         cell.configure(item: item)
         return cell
+    }, titleForHeaderInSection: { source, index in
+      guard let sectionModel = source.sectionModels[safe: index] else {
+        return nil
+      }
+      return sectionModel.header
     })
 
     rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
@@ -72,6 +77,7 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
   func registerCells() {
     tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+    tableView.register(FavoriteGameCell.self, forCellReuseIdentifier: "FavoriteGameCell")
   }
 
   func bind() {
@@ -96,6 +102,7 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
       .asDriver()
       .drive(viewModel.input.didTapCell)
       .disposed(by: disposeBag)
+
   }
 
 }
