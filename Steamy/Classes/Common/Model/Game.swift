@@ -22,6 +22,7 @@ class Game: Mappable {
   var backgroundImageURL: URL?
   var screenshotURLs: [URL]?
   var price: String?
+  var screenshots: [GameScreenshot]?
 
   // MARK: - Mappable
 
@@ -38,5 +39,23 @@ class Game: Mappable {
     headerImageURL <- (map["header_image"], URLTransform())
     backgroundImageURL <- (map["background"], URLTransform())
     price <- map["price_overview.final_formatted"]
+    screenshots <- map["screenshots"]
+  }
+}
+
+class GameScreenshot: Mappable {
+
+  var id: Int?
+  var thumbnailURL: URL?
+  var fullURL: URL?
+
+  required init?(map: Map) {
+    
+  }
+
+  func mapping(map: Map) {
+    id <- map["id"]
+    thumbnailURL <- (map["thumbnail_path"], URLTransform())
+    fullURL <- (map["path_full"], URLTransform())
   }
 }

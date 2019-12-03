@@ -19,4 +19,5 @@ protocol UserManagerProviderProtocol {
   func achievementsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func gameStatsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func friends(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
+  func badges(with userId: Int, completion: (([JSONObject]?, Error?) -> ())?)
 }

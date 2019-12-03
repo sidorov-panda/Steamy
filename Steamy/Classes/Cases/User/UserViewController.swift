@@ -26,10 +26,6 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
     self.viewModel = viewModel
   }
 
-  func bind() {
-    userInfoView.configure(item: viewModel.output.userInfoItem())
-  }
-
   // MARK: -
 
   override func viewDidLoad() {
@@ -39,7 +35,7 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
 
     settings.style.buttonBarMinimumInteritemSpacing = 1
     settings.style.buttonBarMinimumLineSpacing = 1
-    settings.style.buttonBarLeftContentInset = 32
+    settings.style.buttonBarLeftContentInset = 10
     settings.style.selectedBarBackgroundColor = .white
     settings.style.selectedBarHeight = 1
     settings.style.buttonBarItemFont = UIFont.systemFont(ofSize: 12.0)
@@ -50,8 +46,12 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
     settings.style.buttonBarItemBackgroundColor = .defaultBackgroundColor
     settings.style.buttonBarItemsShouldFillAvailableWidth = false
     settings.style.selectedBarHeight = 2
-    
+
     super.viewDidLoad()
+
+    if #available(iOS 11.0, *) {} else {
+      automaticallyAdjustsScrollViewInsets = false
+    }
 
     configureUI()
     bind()
@@ -64,15 +64,15 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
   let userInfoView = UserInfoView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
 
   func configureUI() {
-    self.view.backgroundColor = .defaultBackgroundColor
-
+    view.backgroundColor = .defaultBackgroundColor
     buttonBarView.selectedBar.layer.cornerRadius = 2.0
+    buttonBarView.backgroundColor = .clear
 
     self.view.addSubview(userInfoView)
     self.view.addSubview(scrollView)
 
     userInfoView.snp.makeConstraints { (maker) in
-      maker.top.equalTo(self.view).offset(50)
+      maker.top.equalTo(self.view).offset(60)
       maker.leading.equalTo(self.view)
       maker.trailing.equalTo(self.view)
       maker.height.equalTo(83)
@@ -91,6 +91,10 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
       maker.leading.equalTo(self.view)
       maker.trailing.equalTo(self.view)
     }
+  }
+
+  func bind() {
+    userInfoView.configure(item: viewModel.output.userInfoItem())
   }
 
   override public func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {

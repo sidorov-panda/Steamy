@@ -33,6 +33,7 @@ class GameViewController: BaseViewController, ControllerProtocol {
     viewModel
       .output
       .sections
+      .retry()
       .bind(to: tableView.rx.items(dataSource: rxDataSource!))
       .disposed(by: disposeBag)
 
@@ -66,21 +67,38 @@ class GameViewController: BaseViewController, ControllerProtocol {
         }
       }).disposed(by: disposeBag)
 
+    viewModel
+      .output
+      .images
+      .asDriver(onErrorJustReturn: [])
+      .drive(onNext: { [weak self] (images) in
+        if images.count > 0 {
+          self?.slideshow.setImageInputs(images)
+          self?.slideshow.contentScaleMode = .scaleAspectFill
+          self?.tableView.tableHeaderView = self?.slideshow
+        } else {
+          self?.tableView.tableHeaderView = nil
+        }
+      }).disposed(by: disposeBag)
+
     //Input
     viewModel.input.viewDidLoad.onNext(())
   }
 
   // MARK: -
 
-  var tableView = UITableView()
+  var tableView = UITableView(frame: .zero, style: .grouped) {
+    didSet {
+      tableView.estimatedRowHeight = 100
+      tableView.rowHeight = UITableView.automaticDimension
+    }
+  }
   var backgroundImage = UIImageView()
 
   var rxDataSource: RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>?
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    self.view.backgroundColor = .red
 
     configureUI()
     registerCells()
@@ -94,12 +112,16 @@ class GameViewController: BaseViewController, ControllerProtocol {
         }
         cell.configure(item: item)
         return cell
-    })
+      }, titleForHeaderInSection: { source, index in
+        guard let sectionModel = source.sectionModels[safe: index] else {
+          return nil
+        }
+        return sectionModel.header
+      })
 
     rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
                                                                   reloadAnimation: .automatic,
                                                                   deleteAnimation: .automatic)
-
     bind()
   }
 
@@ -114,26 +136,31 @@ class GameViewController: BaseViewController, ControllerProtocol {
   }
 
   func registerCells() {
-    self.tableView.register(GameInfoCell.self, forCellReuseIdentifier: "GameInfoCell")
+    tableView.register(GameInfoCell.self, forCellReuseIdentifier: "GameInfoCell")
+    tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+    tableView.register(ChartCell.self, forCellReuseIdentifier: "ChartCell")
   }
 
   // MARK: -
-  
-  let slideshow = ImageSlideshow(frame: CGRect(x: 0, y: 0, width: 10, height: 100))
+
+  var slideshow = ImageSlideshow(frame: CGRect(x: 0, y: 0, width: 10, height: 100))
 
   func configureUI() {
-    tableView.backgroundColor = .clear
+    tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.tableFooterView = UIView()
+    tableView.estimatedRowHeight = 55
+    tableView.rowHeight = UITableView.automaticDimension
 
     backgroundImage.contentMode = .scaleAspectFill
     backgroundImage.clipsToBounds = true
-    view.addSubview(backgroundImage)
-    backgroundImage.snp.makeConstraints { (maker) in
-      maker.top.equalTo(self.view)
-      maker.leading.equalTo(self.view)
-      maker.trailing.equalTo(self.view)
-      maker.bottom.equalTo(self.view)
-    }
+//    view.addSubview(backgroundImage)
+//    tableView.backgroundView = backgroundImage
+//    backgroundImage.snp.makeConstraints { (maker) in
+//      maker.top.equalTo(self.view)
+//      maker.leading.equalTo(self.view)
+//      maker.trailing.equalTo(self.view)
+//      maker.bottom.equalTo(self.view)
+//    }
 
     view.addSubview(tableView)
     tableView.snp.makeConstraints { (maker) in
@@ -142,17 +169,5 @@ class GameViewController: BaseViewController, ControllerProtocol {
       maker.right.equalTo(self.view)
       maker.bottom.equalTo(self.view)
     }
-
-//    slideshow.snp.makeConstraints { (maker) in
-//      maker.leading.equalToSuperview()
-//      maker.trailing.equalToSuperview()
-//      maker.top.equalToSuperview()
-//      maker.height.equalTo(70)
-//      maker.bottom.equalToSuperview()
-//    }
-
-    slideshow.backgroundColor = .red
-    tableView.tableHeaderView = slideshow
   }
-
 }

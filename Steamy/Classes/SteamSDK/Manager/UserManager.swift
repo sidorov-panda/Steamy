@@ -28,6 +28,23 @@ class UserManager {
 
   // MARK: - Methods
 
+  func badges(userId: Int, completion: (([Badge]?, Error?) -> ())?) {
+    self.provider.badges(with: userId) { (response, error) in
+      var badges: [Badge]?
+      var err: Error?
+
+      defer {
+        completion?(badges, err)
+      }
+
+      guard let resp = response else {
+        err = UserManagerError.wrongResponse
+        return
+      }
+      badges = Mapper<Badge>().mapArray(JSONArray: resp)
+    }
+  }
+
   func user(id: Int, completion: ((User?, Error?) -> ())?) {
     //Transforming into User Model
     self.provider.userData(with: id) { (response, error) in
@@ -185,7 +202,6 @@ class UserManager {
 
   func achievements(userId: Int, gameId: Int, completion: (([GameAchievement]?, Error?) -> ())?) {
     self.provider.achievementsData(with: userId, gameId: gameId) { (response, error) in
-
       var err: Error?
       var achievments: [GameAchievement]?
 
@@ -205,35 +221,33 @@ class UserManager {
 
   func friends(userId: Int, completion: (([User]?, Error?) -> ())?) {
     self.provider.friends(with: userId) { (response, error) in
-      if
+      guard
         let friendlist = response?["friendslist"] as? [String: Any],
-        let friends = friendlist["friends"] as? [[String: Any]] {
+        let friends = friendlist["friends"] as? [[String: Any]] else {
+          completion?(nil, UserManagerError.wrongResponse)
+          return
+      }
 
-          let userIds = friends.filter ({ (friendDict) -> Bool in
-            return ((friendDict["relationship"] as? String) ?? "") == "friend"
-          }).map { (friendDict) -> Int? in
-            return Int((friendDict["steamid"] as? String) ?? "")
-          }.filter { (val) -> Bool in
-            return val != nil
-          } as? [Int] ?? []
+      let userIds = friends.filter ({ (friendDict) -> Bool in
+        return ((friendDict["relationship"] as? String) ?? "") == "friend"
+      }).map { (friendDict) -> Int? in
+        return Int((friendDict["steamid"] as? String) ?? "")
+      }.filter { (val) -> Bool in
+        return val != nil
+      } as? [Int] ?? []
 
-          guard userIds.count > 0 else {
-            completion?(nil, UserManagerError.noUserIds)
-            return
-          }
-          //Not the best solution, but for simplicity purposes
-          self.users(ids: userIds) { (usersResponse, usersError) in
-            guard usersError == nil else {
-              completion?(usersResponse, usersError)
-              return
-            }
-            completion?(usersResponse, nil)
-          }
-      } else {
-        completion?(nil, UserManagerError.wrongResponse)
+      guard userIds.count > 0 else {
+        completion?(nil, UserManagerError.noUserIds)
         return
+      }
+      //Not the best solution, but for simplicity purposes
+      self.users(ids: userIds) { (usersResponse, usersError) in
+        guard usersError == nil else {
+          completion?(usersResponse, usersError)
+          return
+        }
+        completion?(usersResponse, nil)
       }
     }
   }
-
 }

@@ -35,8 +35,10 @@ class GameRouter: BaseRouter {
       let userViewModel = GameViewModel(
         userId: userId,
         gameId: gameId,
+        isFavoriteGame: gameId == Session.shared.gameId,
         dependencies: GameViewModelDependency(userManager: userManager,
-                                              gameManager: gameManager)) else {
+                                              gameManager: gameManager,
+                                              statisticProvider: RealmStatisticProvider())) else {
         return nil
     }
     let userVC = GameViewController()

@@ -41,6 +41,7 @@ class User: Mappable {
   // MARK: -
 }
 
+///Using different model, so we will gave a better flexibility in storing additional fields
 class UserDB: Object {
 
   //Realm-use only
@@ -74,4 +75,3 @@ class FriendDB: Object {
     return "steamidPk"
   }
 }
-

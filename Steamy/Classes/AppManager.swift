@@ -66,6 +66,11 @@ class AppManager {
         }
       })
     }
+    
+    userManager.badges(userId: userId) { (badges, error) in
+
+      print(badges)
+    }
   }
 
   let keyDateDormatter = DateFormatter(withFormat: "yyyyMMdd", locale: "en_US")

@@ -12,6 +12,11 @@ import Foundation
 /// as well as transform data somehow
 class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
 
+  //Provider Error cases
+  enum UserManagerSteamAPIProviderError: Error {
+    case wrongResponse
+  }
+
   //Using HTTP as a transport
   let steamAPI = SteamAPI(httpClient: HTTPClient())
 
@@ -78,6 +83,30 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
   func friends(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
     steamAPI.request(.friends(userId: userId)) { (response, error) in
       completion?(response, error)
+    }
+  }
+
+  func badges(with userId: Int, completion: (([UserManagerSteamAPIProvider.JSONObject]?, Error?) -> ())?) {
+    steamAPI.request(.badges(userId: userId)) { (response, error) in
+      var preparedResponse = [[String: Any]]()
+      var err: Error?
+      defer {
+        completion?(preparedResponse, err)
+      }
+
+      guard error == nil else {
+        err = error
+        return
+      }
+
+      guard
+        let response = response?["response"] as? [String: Any],
+        let badges = response["badges"] as? [[String: Any]] else {
+          err = UserManagerSteamAPIProviderError.wrongResponse
+          return
+      }
+
+      preparedResponse = badges
     }
   }
 }

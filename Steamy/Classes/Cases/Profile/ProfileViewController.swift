@@ -26,7 +26,11 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView = UITableView()
+  var tableView = UITableView(frame: .zero, style: .grouped) {
+    didSet {
+
+    }
+  }
 
   // MARK: -
 
@@ -35,7 +39,6 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    self.view.backgroundColor = .defaultBackgroundColor
     configureUI()
 
     registerCells()
@@ -59,11 +62,16 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
     rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
                                                                   reloadAnimation: .automatic,
                                                                   deleteAnimation: .automatic)
-
     bind()
   }
 
   func configureUI() {
+    tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
+    view.backgroundColor = .defaultBackgroundCellColor
+    tableView.tableFooterView = UIView()
+    tableView.backgroundColor = .defaultBackgroundCellColor
+    tableView.estimatedRowHeight = 55
+    tableView.rowHeight = UITableView.automaticDimension
     self.view.addSubview(tableView)
 
     tableView.snp.makeConstraints({ (maker) in
@@ -75,9 +83,10 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
   }
 
   func registerCells() {
-    tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
+    tableView.register(ActivityCell.self, forCellReuseIdentifier: "ActivityCell")
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
     tableView.register(FavoriteGameCell.self, forCellReuseIdentifier: "FavoriteGameCell")
+    tableView.register(ShowcaseCell.self, forCellReuseIdentifier: "ShowcaseCell")
   }
 
   func bind() {
@@ -102,9 +111,7 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
       .asDriver()
       .drive(viewModel.input.didTapCell)
       .disposed(by: disposeBag)
-
   }
-
 }
 
 extension ProfileViewController: IndicatorInfoProvider {

@@ -12,6 +12,7 @@ import XLPagerTabStrip
 import RealmSwift
 import Charts
 import SnapKit
+import RxDataSources
 
 class ActivityViewController: BaseViewController, ControllerProtocol {
 
@@ -25,39 +26,97 @@ class ActivityViewController: BaseViewController, ControllerProtocol {
 
   var viewModel: ActivityViewModel!
 
-  let barChartView = BarChartView()
+  // MARK: -
+
+  var tableView: UITableView = UITableView(frame: .zero, style: .grouped)
 
   // MARK: -
 
-  let realm = try! Realm()
+  var rxDataSource: RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>?
 
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    let userId = Session.shared.userId!
+    configureUI()
 
-    let data = realm.objects(GameStatDB.self).filter("user=%@", String(userId))
+    registerCells()
 
-    var entries = [BarChartDataEntry]()
-    data.forEach { (stat) in
-      let xx = Int(stat.date ?? "") ?? 0
-      entries.append(
-        BarChartDataEntry(x: Double(xx), yValues: [Double(Int(stat.value!) ?? 0)])
-      )
+    rxDataSource = RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>(
+      configureCell: { dataSource, tableView, indexPath, sm in
+        guard
+          let item = try? dataSource.model(at: indexPath) as? BaseCellItem,
+          let cell = tableView.dequeueReusableCell(withIdentifier: item.reuseIdentifier) as? ConfigurableCell else {
+            return UITableViewCell()
+        }
+        cell.configure(item: item)
+        return cell
+    }, titleForHeaderInSection: { source, index in
+      guard let sectionModel = source.sectionModels[safe: index] else {
+        return nil
+      }
+      return sectionModel.header
+    })
+
+    rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
+                                                                  reloadAnimation: .automatic,
+                                                                  deleteAnimation: .automatic)
+
+    bind()
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+  }
+
+  func configureUI() {
+    view.backgroundColor = .defaultBackgroundCellColor
+    tableView.backgroundColor = .defaultBackgroundCellColor
+    tableView.tableFooterView = UIView()
+    if #available(iOS 11.0, *) {
+      tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
     }
-    let dataset = BarChartDataSet(entries: entries, label: "HZZZ")
-    let chartData = BarChartData(dataSet: dataset)
-    
-    barChartView.data = chartData
+    self.view.addSubview(tableView)
 
-    view.addSubview(barChartView)
-    barChartView.snp.makeConstraints { (maker) in
+    tableView.snp.makeConstraints({ (maker) in
       maker.leading.equalTo(self.view)
-      maker.trailing.equalTo(self.view)
       maker.top.equalTo(self.view)
-      maker.height.equalTo(100)
-    }
+      maker.right.equalTo(self.view)
+      maker.bottom.equalTo(self.view)
+    })
+  }
 
+  func registerCells() {
+    tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
+    tableView.register(ActivityCell.self, forCellReuseIdentifier: "ActivityCell")
+    tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+  }
+
+  func bind() {
+    //Output
+    viewModel
+      .output
+      .sections
+      .bind(to: tableView.rx.items(dataSource: rxDataSource!))
+      .disposed(by: disposeBag)
+
+    viewModel
+      .output
+      .showController
+      .subscribe(onNext: { [weak self] (viewController) in
+        self?.navigationController?.pushViewController(viewController, animated: true)
+      }).disposed(by: disposeBag)
+
+    //Input
+    tableView
+      .rx
+      .itemSelected
+      .asDriver()
+      .drive(viewModel.input.didTapCell)
+      .disposed(by: disposeBag)
   }
 }
 

@@ -12,18 +12,22 @@ import AlamofireImage
 class FriendCellItem: BaseCellItem {
   var name: String?
   var avatarURL: URL?
+  var placeholderImage: UIImage? = UIImage(named: "gamePlaceholderSmall")?
+    .af_imageScaled(to: CGSize(width: 30, height: 30))
 }
 
 class FriendCell: BaseCell {
 
   // MARK: -
 
-  override func awakeFromNib() {
-    super.awakeFromNib()
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    
+    self.backgroundColor = .defaultBackgroundCellColor
   }
 
-  override func setSelected(_ selected: Bool, animated: Bool) {
-    super.setSelected(selected, animated: animated)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
 
   // MARK: - Configurable
@@ -36,9 +40,11 @@ class FriendCell: BaseCell {
     }
 
     self.textLabel?.text = item.name
-    self.textLabel?.textColor = .black
+    self.textLabel?.textColor = .white
     if let imageURL = item.avatarURL {
-      self.imageView?.af_setImage(withURL: imageURL)
+      self.imageView?.af_setImage(withURL: imageURL,
+                                  placeholderImage: item.placeholderImage,
+                                  filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))
     }
   }
 
@@ -47,7 +53,8 @@ class FriendCell: BaseCell {
   override func prepareForReuse() {
     super.prepareForReuse()
 
-    self.imageView?.image = nil
+    self.imageView?.image = UIImage(named: "gamePlaceholderSmall")?
+      .af_imageScaled(to: CGSize(width: 30, height: 30))
     self.textLabel?.text = nil
   }
 }

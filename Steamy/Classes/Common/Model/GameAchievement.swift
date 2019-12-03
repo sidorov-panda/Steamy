@@ -13,9 +13,14 @@ class GameAchievement: Mappable {
 
   // MARK: -
 
- dynamic var name: String?
- dynamic var achieved: Bool = false
- dynamic var unlockTime: Int?
+  var name: String?
+  var displayName: String?
+  var desc: String?
+  var hidden: Bool = false
+  var iconURL: URL?
+  var icongrayURL: URL?
+  var achieved: Bool = false
+  var unlockTime: Int?
 
   // MARK: - Mappable
 
@@ -24,7 +29,12 @@ class GameAchievement: Mappable {
   }
 
   func mapping(map: Map) {
-    name <- map["apiname"]
+    name <- map["name"]
+    displayName <- map["displayName"]
+    hidden <- map["hidden"]
+    desc <- map["desc"]
+    iconURL <- (map["icon"], URLTransform())
+    icongrayURL <- (map["icongray"], URLTransform())
     achieved <- map["achieved"]
     unlockTime <- map["unlocktime"]
   }

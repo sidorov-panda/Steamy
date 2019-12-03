@@ -35,7 +35,6 @@ class GameListViewController: BaseViewController, ControllerProtocol {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    self.view.backgroundColor = .defaultBackgroundColor
     configureUI()
 
     registerCells()
@@ -71,6 +70,8 @@ class GameListViewController: BaseViewController, ControllerProtocol {
   }
 
   func configureUI() {
+    view.backgroundColor = .defaultBackgroundColor
+    tableView.backgroundColor = .defaultBackgroundCellColor
     self.view.addSubview(tableView)
 
     tableView.snp.makeConstraints({ (maker) in

@@ -10,7 +10,7 @@ import Foundation
 
 fileprivate let SteamAPIBaseURLString = "http://api.steampowered.com"
 fileprivate let SteamStoreAPIBaseURLString = "https://store.steampowered.com"
-fileprivate let SteamAPIKey = "100170AD8C821B6B6948EA460DD9F89D"
+fileprivate let SteamAPIKey = "85C8BD436F4D49C79B574B6BAD2D23C6"//"100170AD8C821B6B6948EA460DD9F89D"
 
 class SteamAPI {
 
@@ -39,7 +39,9 @@ class SteamAPI {
     case recentlyPlayedGames(userId: Int)
     case gameStats(userId: Int, gameId: Int)
     case gameInfo(gameId: Int)
+    case gameSchema(gameId: Int)
     case achievements(userId: Int, gameId: Int)
+    case badges(userId: Int)
 
     func url() -> URL? {
       var components: URLComponents?
@@ -78,14 +80,25 @@ class SteamAPI {
         path += "ISteamUserStats/GetUserStatsForGame"
         break
 
+      case .gameSchema(_):
+        path += "ISteamUserStats/GetSchemaForGame"
+        break
+
       case .gameInfo(_):
         path += "api/appdetails"
         break
 
       case .achievements(_, _):
         path += "ISteamUserStats/GetPlayerAchievements"
+        break
+
       case .friends(_):
         path += "ISteamUser/GetFriendList"
+        break
+
+      case .badges(_):
+        path += "IPlayerService/GetBadges"
+        break
       }
       path.append("/\(self.APIVersion())/")
       return path
@@ -95,9 +108,11 @@ class SteamAPI {
       switch self {
       case .user(_), .users(_), .gameStats(_, _):
         return "v0002"
+      case .gameSchema(_):
+        return "v2"
       case .ownedGames(_), .achievements(_, _), .recentlyPlayedGames(_), .friends(_):
         return "v0001"
-      case .userLevel(_):
+      case .userLevel(_), .badges(_):
         return "v1"
       case .gameInfo(_):
         return ""
@@ -108,30 +123,45 @@ class SteamAPI {
       var ret = [URLQueryItem]()
       ret.append(URLQueryItem(name: "key", value: SteamAPIKey))
       ret.append(URLQueryItem(name: "format", value: "json"))
+
       switch self {
       case .user(let id):
         ret.append(URLQueryItem(name: "steamids", value: String(id)))
+
       case .users(let ids):
         ret.append(
           URLQueryItem(name: "steamids", value: Array(Set(ids)).sorted().map { String($0) }.joined(separator: ","))
         )
+
       case .ownedGames(let userId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
         ret.append(URLQueryItem(name: "include_played_free_games", value: "1"))
         ret.append(URLQueryItem(name: "include_appinfo", value: "1"))
+
       case .recentlyPlayedGames(let userId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
+
       case .userLevel(let id):
         ret.append(URLQueryItem(name: "steamid", value: String(id)))
+
       case .gameStats(let userId, let gameId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
         ret.append(URLQueryItem(name: "appid", value: String(gameId)))
+
+      case .gameSchema(let gameId):
+        ret.append(URLQueryItem(name: "appid", value: String(gameId)))
+
       case .gameInfo(let gameId):
         ret.append(URLQueryItem(name: "appids", value: String(gameId)))
+
       case .achievements(let userId, let gameId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
         ret.append(URLQueryItem(name: "appid", value: String(gameId)))
+
       case .friends(let userId):
+        ret.append(URLQueryItem(name: "steamid", value: String(userId)))
+
+      case .badges(let userId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
       }
       return ret

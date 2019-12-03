@@ -12,6 +12,7 @@ import ObjectMapper
 protocol GameManagerProviderProtocol {
   typealias JSONObject = [String: Any]
   func gameData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
+  func gameStatData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
 }
 
 class GameManagerSteamAPIProvider: GameManagerProviderProtocol {
@@ -21,6 +22,12 @@ class GameManagerSteamAPIProvider: GameManagerProviderProtocol {
 
   func gameData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
     steamAPI.request(.gameInfo(gameId: id)) { (response, error) in
+      completion?(response, error)
+    }
+  }
+
+  func gameStatData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
+    steamAPI.request(.gameSchema(gameId: id)) { (response, error) in
       completion?(response, error)
     }
   }
@@ -60,6 +67,38 @@ class GameManager {
       }
 
       game = Mapper<Game>().map(JSON: data)
+    }
+  }
+  
+  func gameStats(id: Int, completion: (([GameStat]?, [GameAchievement]?, Error?) -> ())?) {
+    self.provider.gameStatData(with: id) { (response, error) in
+      var stats: [GameStat]?
+      var achiev: [GameAchievement]?
+      var err: Error?
+
+      defer {
+        completion?(stats, achiev, err)
+      }
+
+      guard error == nil else {
+        err = error
+        return
+      }
+
+      if
+        let response = response?["game"] as? [String: Any],
+        let gameStats = response["availableGameStats"] as? [String: Any] {
+
+          if let userStats = gameStats["stats"] as? [[String: Any]] {
+            stats = Mapper<GameStat>().mapArray(JSONArray: userStats)
+          }
+
+          if let achievements = gameStats["achievements"] as? [[String: Any]] {
+            achiev = Mapper<GameAchievement>().mapArray(JSONArray: achievements)
+          }
+      } else {
+        err = GameManagerError.wrongResponse
+      }
     }
   }
 }

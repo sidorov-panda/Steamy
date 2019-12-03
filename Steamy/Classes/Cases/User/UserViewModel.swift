@@ -47,11 +47,12 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   func userViewControllers() -> [UIViewController] {
     guard
       let profileVC = ProfileRouter.profileViewController(with: userId),
-      let friendsVC = FriendsRouter.friendsViewController(with: userId)
+      let friendsVC = FriendsRouter.friendsViewController(with: userId),
+      let activityVC = ActivityRouter.activityViewController(with: userId)
     else {
       return []
     }
-    return [profileVC, ActivityViewController(), friendsVC, ProfileViewController(), ProfileViewController()]
+    return [profileVC, activityVC, friendsVC]
   }
 
   // MARK: -
@@ -80,20 +81,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
       }
     }
 
-//    self.dependencies.userManager.games(userId: Session.shared.userId!) { (games, error) in
-//      print(games)
-//      print(error)
-//    }
-
-//    self.dependencies.userManager.recentlyPlayedGames(userId: Session.shared.userId!) { (games, error) in
-//      print(games)
-//      print(error)
-//    }
-
     self.dependencies.userManager.level(userId: userId) { (level, error) in
-      print(level)
-      print(error)
-
       if let level = level {
         self.levelSubject.onNext(String(level) + " level")
       }

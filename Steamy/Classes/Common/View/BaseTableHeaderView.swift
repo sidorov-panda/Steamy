@@ -16,6 +16,8 @@ class BaseTableHeaderView: UITableViewHeaderFooterView {
   override init(reuseIdentifier: String?) {
     super.init(reuseIdentifier: reuseIdentifier)
 
+    self.backgroundColor = UIColor.defaultBackgroundCellColor
+
     self.addSubview(titleLabel)
     titleLabel.snp.makeConstraints { (maker) in
       maker.leading.equalTo(self).offset(10)
@@ -39,5 +41,4 @@ class BaseTableHeaderView: UITableViewHeaderFooterView {
     super.prepareForReuse()
     self.titleLabel.text = nil
   }
-
 }

@@ -20,6 +20,8 @@ protocol ControllerProtocol: class {
 
 class BaseViewController: UIViewController {
 
+  // MARK: -
+
   override func viewDidLoad() {
     super.viewDidLoad()
 
@@ -27,6 +29,12 @@ class BaseViewController: UIViewController {
     self.extendedLayoutIncludesOpaqueBars = true
     self.edgesForExtendedLayout = UIRectEdge.bottom
   }
+
+  override var preferredStatusBarStyle: UIStatusBarStyle {
+    return .lightContent
+  }
+  
+  // MARK: -
 
   var disposeBag = DisposeBag()
 }

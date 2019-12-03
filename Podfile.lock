@@ -11,6 +11,9 @@ PODS:
   - Differentiator (4.0.1)
   - ImageSlideshow (1.8.1):
     - ImageSlideshow/Core (= 1.8.1)
+  - ImageSlideshow/Alamofire (1.8.1):
+    - AlamofireImage (~> 3.0)
+    - ImageSlideshow/Core
   - ImageSlideshow/Core (1.8.1)
   - ObjectMapper (3.5.1)
   - Realm (3.18.0):
@@ -44,6 +47,7 @@ DEPENDENCIES:
   - Charts
   - ChartsRealm
   - ImageSlideshow (~> 1.8.1)
+  - ImageSlideshow/Alamofire
   - ObjectMapper
   - RealmSwift
   - RxDataSources
@@ -95,6 +99,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: 2610b932386590bb970eaffbb0134a94230babae
+PODFILE CHECKSUM: 07481f719a12391eb3e7893dc4fefe49628a21c5
 
 COCOAPODS: 1.8.4

@@ -1,0 +1,136 @@
+//
+//  ChartCell.swift
+//  Steamy
+//
+//  Created by Alexey Sidorov on 01.12.2019.
+//  Copyright © 2019 Alexey Sidorov. All rights reserved.
+//
+
+import UIKit
+import Charts
+
+class ChartCellItem: BaseCellItem {
+  // "20 Dec": ["Kills": 30, "Deaths": 25]
+  // "21 Dec": ["Kills": 35, "Deaths": 18]
+  var data: [Date: [String: (String, UIColor, Int)]]?
+}
+
+class ChartCell: BaseCell {
+
+  // MARK: -
+
+  var chartView = BarChartView()
+
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+    backgroundColor = .defaultBackgroundCellColor
+
+    self.addSubview(chartView)
+    chartView.snp.makeConstraints { (maker) in
+      maker.leading.equalTo(self)
+      maker.trailing.equalTo(self)
+      maker.top.equalTo(self)
+      maker.bottom.equalTo(self).priority(.medium)
+      maker.height.equalTo(260)
+    }
+  }
+
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  // MARK: -
+
+  override func configure(item: BaseCellItem) {
+    super.configure(item: item)
+
+    guard let item = item as? ChartCellItem else {
+      return
+    }
+
+    let referenceTimeInterval: TimeInterval = (item.data?.keys.min() ?? Date()).timeIntervalSince1970
+
+    var colors: [String: UIColor] = [:]
+    var titles: [String: String] = [:]
+    let days = (item.data ?? [:]).keys.count
+    var minYValue = 0.0
+    var minXValue = 0.0
+    var entries: [String: [BarChartDataEntry]] = [:]
+    (item.data ?? [:]).keys.forEach { (key) in
+      let xx = key.timeIntervalSince1970
+      let xValue = (xx - referenceTimeInterval) / (3600 * 24)
+      minXValue = (xx < minXValue) ? xx : minXValue
+      item.data?[key]?.keys.forEach({ (name) in
+        if let val = item.data?[key]?[name] {
+          if entries[name] == nil {
+            entries[name] = []
+          }
+          titles[name] = val.0
+          colors[name] = val.1
+          entries[name]?.append(BarChartDataEntry(x: xValue, y: Double(val.2)))
+        }
+      })
+    }
+
+    var chartDataSets: [BarChartDataSet] = []
+    for (key, value) in entries {
+      let chartDataSet = BarChartDataSet(entries: value, label: titles[key] ?? key)
+      if let color = colors[key] {
+        chartDataSet.colors = [color]
+      }
+      chartDataSets.append(chartDataSet)
+    }
+
+    let chartData = BarChartData(dataSets: chartDataSets)
+
+    // (0.2 + 0.03) * 2 + 0.54 = 1.00
+    let barSpace = 0.03
+    let barWidth = 0.2
+    let groupSpace = 0.54
+    chartData.barWidth = barWidth
+
+    let gpWidth = chartData.groupWidth(groupSpace: groupSpace, barSpace: barSpace)
+
+    chartView.xAxis.axisMinimum = Double(0)
+    chartView.xAxis.axisMaximum = Double(0) + gpWidth * Double(4)
+    chartData.groupBars(fromX: Double(0), groupSpace: groupSpace, barSpace: barSpace)
+//    chartView.setVisibleXRange(minXRange: Double(0), maxXRange: Double(10))
+    chartView.data = chartData
+
+//    chartView.moveViewToX(gpWidth)
+
+    // Define chart xValues formatter
+    let formatter = DateFormatter()
+    formatter.dateStyle = .short
+    formatter.timeStyle = .none
+    formatter.locale = Locale.current
+
+    let xValuesNumberFormatter = ChartXAxisFormatter(referenceTimeInterval: referenceTimeInterval, dateFormatter: formatter)
+
+    let xAxis = chartView.xAxis
+    xAxis.labelPosition = .topInside
+    xAxis.labelFont = .systemFont(ofSize: 10, weight: .light)
+    xAxis.labelTextColor = UIColor(red: 255/255, green: 192/255, blue: 56/255, alpha: 1)
+    xAxis.drawAxisLineEnabled = false
+    xAxis.drawGridLinesEnabled = true
+    xAxis.centerAxisLabelsEnabled = true
+    xAxis.granularity = 1
+    xAxis.valueFormatter = xValuesNumberFormatter
+
+    let rightYAxis = chartView.rightAxis
+    rightYAxis.labelPosition = .insideChart
+    rightYAxis.drawLabelsEnabled = false
+    rightYAxis.drawGridLinesEnabled = false
+
+    let leftYAxis = chartView.leftAxis
+    leftYAxis.labelPosition = .insideChart
+    leftYAxis.drawLabelsEnabled = false
+    leftYAxis.drawGridLinesEnabled = false
+
+    chartView.notifyDataSetChanged()
+    chartView.setNeedsLayout()
+    chartView.setNeedsDisplay()
+    chartView.layoutIfNeeded()
+  }
+}

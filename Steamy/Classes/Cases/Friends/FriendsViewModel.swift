@@ -78,17 +78,20 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
     var sctns = [BaseTableSectionItem]()
 
     var friendCells: [BaseCellItem] = self.users.map { (user) -> FriendCellItem in
-      let friendCellItem = FriendCellItem(reuseIdentifier: "FriendCell", identifier: "FriendCell_\(user.steamid ?? 0)")
+      let friendCellItem = FriendCellItem(reuseIdentifier: "FriendCell",
+                                          identifier: "FriendCell_\(user.steamid ?? 0)")
       friendCellItem.name = user.nickname
       friendCellItem.avatarURL = user.avatarURL
       return friendCellItem
     }
     if friendCells.count == 0 {
-      let noFriendsCell = TitleCellItem(reuseIdentifier: "TitleCell", identifier: "TitleCell_NoFriends")
+      let noFriendsCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                        identifier: "TitleCell_NoFriends")
       noFriendsCell.title = "No friends yet"
       friendCells.append(noFriendsCell)
     }
     let section = BaseTableSectionItem(header: "Friends", items: friendCells)
-    sectionsRelay.accept([section])
+    sctns.append(section)
+    sectionsRelay.accept(sctns)
   }
 }

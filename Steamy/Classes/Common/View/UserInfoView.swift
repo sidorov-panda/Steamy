@@ -32,7 +32,7 @@ class UserInfoView: UIView {
   override init(frame: CGRect) {
     super.init(frame: frame)
 
-    configureSubviews()
+    configureUI()
   }
 
   required init?(coder: NSCoder) {
@@ -45,27 +45,27 @@ class UserInfoView: UIView {
     item.nameObservable.asDriver(onErrorJustReturn: nil).drive(nameLabel.rx.text).disposed(by: disposeBag)
     item.locationObservable.asDriver(onErrorJustReturn: nil).drive(locationLabel.rx.text).disposed(by: disposeBag)
     item.levelObservable.asDriver(onErrorJustReturn: nil).drive(levelLabel.rx.text).disposed(by: disposeBag)
-    item.avatarObservable.asDriver(onErrorJustReturn: nil).drive(onNext: { (url) in
+    item.avatarObservable.asDriver(onErrorJustReturn: nil).drive(onNext: { [weak self] (url) in
       if let url = url {
         let filter = AspectScaledToFillSizeWithRoundedCornersFilter(
-          size: self.avatarImageView.frame.size,
+          size: self?.avatarImageView.frame.size ?? .zero,
           radius: 10
         )
-        self.avatarImageView.af_setImage(
+        self?.avatarImageView.af_setImage(
           withURL: url,
-          placeholderImage: UIImage(),
+          placeholderImage: UIImage(named: "gamePlaceholderSmall"),
           filter: filter,
           imageTransition: .crossDissolve(0.2)
         )
       } else {
-        //set placeholder
+        self?.avatarImageView.image = UIImage(named: "gamePlaceholderSmall")
       }
-      }).disposed(by: disposeBag)
+    }).disposed(by: disposeBag)
   }
 
   // MARK: -
 
-  func configureSubviews() {
+  func configureUI() {
     levelLabel = UILabel()
     levelLabel.text = ""
     levelLabel.textColor = .white
@@ -94,7 +94,7 @@ class UserInfoView: UIView {
 
     levelLabel.snp.makeConstraints { (maker) in
       maker.top.equalTo(self).offset(0)
-      maker.left.equalTo(self).offset(32)
+      maker.left.equalTo(self).offset(16)
       maker.trailing.equalTo(avatarImageView).offset(-5)
     }
 
@@ -108,6 +108,5 @@ class UserInfoView: UIView {
       maker.top.equalTo(nameLabel.snp.bottom)
       maker.leading.equalTo(nameLabel)
     }
-
   }
 }

@@ -17,6 +17,7 @@ class UserGame: Mappable {
   var name: String?
   var logoURL: URL?
   var iconURL: URL?
+  var playtime2weeks: Int?
   var playtime: Int?
 
   // MARK: - Mappable
@@ -28,6 +29,7 @@ class UserGame: Mappable {
   func mapping(map: Map) {
     id <- map["appid"]
     name <- map["name"]
+    playtime2weeks <- map["playtime_2weeks"]
     playtime <- map["playtime_forever"]
     //TODO: move to transformer
     if

@@ -25,7 +25,7 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView: UITableView = UITableView()
+  var tableView: UITableView = UITableView(frame: .zero, style: .grouped)
 
   // MARK: -
 
@@ -34,7 +34,6 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    self.view.backgroundColor = .defaultBackgroundColor
     configureUI()
 
     registerCells()
@@ -48,6 +47,11 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
         }
         cell.configure(item: item)
         return cell
+    }, titleForHeaderInSection: { source, index in
+      guard let sectionModel = source.sectionModels[safe: index] else {
+        return nil
+      }
+      return sectionModel.header
     })
 
     rxDataSource?.animationConfiguration = AnimationConfiguration(insertAnimation: .top,
@@ -59,16 +63,19 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-
-//    self.navigationController?.navigationBar.isTranslucent = false
   }
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-//    self.navigationController?.navigationBar.isTranslucent = true
   }
 
   func configureUI() {
+    view.backgroundColor = .defaultBackgroundColor
+    tableView.backgroundColor = .defaultBackgroundCellColor
+    if #available(iOS 11.0, *) {
+      tableView.contentInset = UIEdgeInsets(top: -15, left: 0, bottom: 0, right: 0)
+    }
+
     self.view.addSubview(tableView)
 
     tableView.snp.makeConstraints({ (maker) in
@@ -108,7 +115,6 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
       .disposed(by: disposeBag)
   }
 }
-
 
 extension FriendsViewController: IndicatorInfoProvider {
   public func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {

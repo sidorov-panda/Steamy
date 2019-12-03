@@ -19,5 +19,6 @@ target 'Steamy' do
   pod 'SVProgressHUD'
   pod 'XLPagerTabStrip'
   pod 'ImageSlideshow', '~> 1.8.1'
+  pod "ImageSlideshow/Alamofire"
   pod 'ChartsRealm'
 end

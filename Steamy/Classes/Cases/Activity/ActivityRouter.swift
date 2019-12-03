@@ -16,4 +16,18 @@ class ActivityRouter: BaseRouter {
     return nil
   }
 
+  static func activityViewController(with userId: Int) -> UIViewController? {
+
+    let steamAPI = UserManagerSteamAPIProvider()
+    let userManager = UserManager(provider: steamAPI)
+    guard
+      let userViewModel = ActivityViewModel(userId: userId,
+                                            dependencies: ActivityViewModelDependency(userManager: userManager)) else {
+        return nil
+    }
+    let userVC = ActivityViewController()
+    userVC.configure(with: userViewModel)
+    return userVC
+  }
+
 }

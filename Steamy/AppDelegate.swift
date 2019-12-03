@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     //!!!!!REMOVE BEFORE BUILD!!!!
     Session.shared.userId = 76561197960434622
-    
+
     if let rootVC = UIApplication.shared.windows.first?.rootViewController as? RootViewController {
       let rootViewModel = RootViewModel()
       rootVC.configure(with: rootViewModel)
@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func appearance() {
+    window?.tintColor = .white
     // Override point for customization after application launch.
     // Sets background to a blank/empty image
     UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
@@ -45,6 +46,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     UINavigationBar.appearance().backgroundColor = .clear
     // Set translucent. (Default value is already true, so this can be removed if desired.)
     UINavigationBar.appearance().isTranslucent = true
+
+//    UILabel.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).font = UIFont.systemFont(ofSize: 12.0)
+//    UILabel.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).textColor = UIColor(red: 0.29, green: 0.29, blue: 0.38, alpha: 1.0)
+    UITableViewHeaderFooterView.appearance().backgroundColor = UIColor.defaultBackgroundCellColor
+    UIView.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).backgroundColor = UIColor.defaultBackgroundCellColor
   }
 
   func collectData() {

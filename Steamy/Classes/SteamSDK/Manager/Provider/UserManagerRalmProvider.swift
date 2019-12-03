@@ -18,24 +18,22 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
   }
 
   func usersData(with ids: [Int], completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
-    let objects = realm.objects(UserDB.self).filter { (user) -> Bool in
+    let objects = realm.objects(UserDB.self).toArray().filter { (user) -> Bool in
       //HACK since Realm doesn't support list queries yet
       guard let intId = Int((user.steamidPk ?? "")) else {
         return false
       }
       return ids.contains(intId)
     }
-    let users = objects.map { (userDbObj) -> [String: Any] in
-      let userDb = userDbObj
-
+    let users = objects.map { (userDbObj) -> [String: Any?] in
       return [
-        "steamid": userDb.steamidPk ?? "",
-        "avatarfull": userDb.avatarURL ?? "",
-        "realname": userDb.name,
-        "personaname": userDb.nickname,
-        "loccountrycode": userDb.countryCode,
-        "locstatecode": userDb.stateCode,
-        "loccityid": userDb.cityCode.value
+        "steamid": userDbObj.steamidPk ?? "",
+        "avatarfull": userDbObj.avatarURL ?? "",
+        "realname": userDbObj.name,
+        "personaname": userDbObj.nickname,
+        "loccountrycode": userDbObj.countryCode,
+        "locstatecode": userDbObj.stateCode,
+        "loccityid": userDbObj.cityCode.value
       ]
     }
     let resp = ["response": ["players": users]]
@@ -45,19 +43,19 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
   func ownedGamesData(with userId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
-  
+
   func recentlyPlayedGamesData(with userId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
-  
+
   func level(with userId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
-  
+
   func achievementsData(with userId: Int, gameId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
-  
+
   func gameStatsData(with userId: Int, gameId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
@@ -73,4 +71,9 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
     let resp = ["friendslist": ["friends": users]]
     completion?(resp, nil)
   }
+
+  func badges(with userId: Int, completion: (([UserManagerRealmProvider.JSONObject]?, Error?) -> ())?) {
+    
+  }
+
 }

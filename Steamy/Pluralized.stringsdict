@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>minutes</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@minutes@</string>
+		<key>minutes</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>u</string>
+			<key>zero</key>
+			<string>%u minutes</string>
+			<key>one</key>
+			<string>%u minute</string>
+			<key>two</key>
+			<string>%u minutes</string>
+			<key>few</key>
+			<string>%u minutes</string>
+			<key>many</key>
+			<string>%u minutes</string>
+			<key>other</key>
+			<string>%u minute</string>
+		</dict>
+	</dict>
+	<key>hours</key>
+	<dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@hours@</string>
+    <key>hours</key>
+    <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>lu</string>
+        <key>one</key>
+        <string>%lu hour</string>
+        <key>many</key>
+        <string>%lu hours</string>
+        <key>other</key>
+        <string>%lu hours</string>
+    </dict>
+	</dict>
+</dict>
+</plist>

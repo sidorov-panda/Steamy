@@ -71,25 +71,66 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: -
 
   var games: [UserGame] = []
+  var friendsCount: Int?
+  var badgesCount: Int?
+  var groups: Int?
 
   func createSections() {
     var sctns = [BaseTableSectionItem]()
 
+    if self.games.count > 0 {
+      let totalPlayedComponents = (games.reduce(0, {(result: Int, item: UserGame) -> Int in
+        return result + (item.playtime ?? 0)
+      })*60).secondsToHoursMinutesSeconds()
+      var totalPlayedString = ""
+      if totalPlayedComponents.0 > 0 {
+        totalPlayedString = "\(totalPlayedComponents.0) h."
+      }
+      if totalPlayedComponents.1 > 0 {
+        if totalPlayedString != "" {
+          totalPlayedString += " "
+        }
+        totalPlayedString += "\(totalPlayedComponents.1) min"
+      }
+
+      let totalPlayedCell = ShowcaseCellItem(reuseIdentifier: "ShowcaseCell", identifier: "ShowcaseCell")
+      totalPlayedCell.hoursPlayed = totalPlayedString
+      totalPlayedCell.friendsCount = 20
+      let totalPlayedSection = BaseTableSectionItem(header: " ", items: [totalPlayedCell])
+      sctns.append(totalPlayedSection)
+    }
+
     //showing the first 3 games with the greatest playtime
     var gameCells: [BaseCellItem] = Array(self.games.sorted(by: { (game1, game2) -> Bool in
       return (game1.playtime ?? 0) > (game2.playtime ?? 0)
-    })[safe: 0..<3] ?? []).map { (game) -> GameCellItem in
-      let gameCellItem = GameCellItem(reuseIdentifier: "GameCell", identifier: "GameCell_\(game.id ?? 0)")
-      gameCellItem.name = game.name
-      gameCellItem.logoURL = game.logoURL
-      gameCellItem.iconURL = game.iconURL
+    })[safe: 0..<3] ?? []).map { (game) -> ActivityCellItem in
+      let gameCellItem = ActivityCellItem(reuseIdentifier: "ActivityCell",
+                                      identifier: "ActivityCell_\(game.id ?? 0)")
+      
+      gameCellItem.gameName = game.name
+      gameCellItem.gameIconURL = game.iconURL
+      let playedTimeComponents = ((game.playtime2weeks ?? 0) * 60).secondsToHoursMinutesSeconds()
+      var timePlayed = ""
+      if (playedTimeComponents.0) > 0 {
+        timePlayed += "\(playedTimeComponents.0) h."
+      }
+      if (playedTimeComponents.1) > 0 {
+        if timePlayed != "" {
+          timePlayed += " "
+        }
+        timePlayed += "\(playedTimeComponents.1) min"
+      }
+      if timePlayed != "" {
+        timePlayed += " played"
+      }
+      gameCellItem.activityDesc = timePlayed
       return gameCellItem
     }
-    if gameCells.count > 0 {
+    if self.games.count > 3 {
       let seeAllCell = TitleCellItem(reuseIdentifier: "TitleCell", identifier: CellIdentifiers.titleCellSeeAll.rawValue)
       seeAllCell.title = "See All Games"
       gameCells.append(seeAllCell)
-    } else {
+    } else if self.games.count == 0 {
       let noGamesCell = TitleCellItem(reuseIdentifier: "TitleCell", identifier: CellIdentifiers.noGames.rawValue)
       noGamesCell.title = "No games yet"
       gameCells.append(noGamesCell)
@@ -99,11 +140,11 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       let favoriteGame = FavoriteGameCellItem(reuseIdentifier: "FavoriteGameCell",
                                               identifier: "FavoriteGame_\(favoriteGameid)")
       favoriteGame.image = UIImage(named: "favoriteGameLogo")
-      let favoriteSection = BaseTableSectionItem(header: "Favorite Game", items: [favoriteGame])
+      let favoriteSection = BaseTableSectionItem(header: "FAVORITE GAME", items: [favoriteGame])
       sctns.append(favoriteSection)
     }
 
-    let section = BaseTableSectionItem(header: "Games", items: gameCells)
+    let section = BaseTableSectionItem(header: "GAMES", items: gameCells)
     sctns.append(section)
     sectionsRelay.accept(sctns)
   }
@@ -114,7 +155,7 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
     guard let section = self.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
       return
     }
-    if section.identifier.starts(with: "GameCell") || section.identifier.starts(with: "FavoriteGame") {
+    if section.identifier.starts(with: "ActivityCell") || section.identifier.starts(with: "FavoriteGame") {
       //show
       guard
         let gameId = Int(section.identifier.split(separator: "_").last ?? ""),
@@ -131,5 +172,4 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       self.showControllerSubject.onNext(userViewController)
     }
   }
-
 }
