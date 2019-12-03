@@ -21,22 +21,13 @@ class ShowcaseCell: BaseCell {
 
   // MARK: -
 
-  var tiles = [UIView]()
+  var tiles = [TileView]()
 
   var scrollView = UIScrollView()
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    
-    self.addSubview(scrollView)
-    scrollView.snp.makeConstraints { (maker) in
-      maker.height.equalTo(83)
-      maker.leading.equalToSuperview()
-      maker.trailing.equalToSuperview()
-      maker.bottom.equalToSuperview().priority(.medium)
-      maker.top.equalToSuperview()
-    }
-
+    configureUI()
   }
 
   required init?(coder: NSCoder) {
@@ -52,11 +43,31 @@ class ShowcaseCell: BaseCell {
       return
     }
 
+    zip([["Played": item.hoursPlayed ?? "0 h"], ["Friends": "\(item.friendsCount ?? 0)"], ["Games": "\(item.gamesCount ?? 0)"]],
+        tiles).forEach { (val, tile) in
+          tile.valueLabel.text = val.values.first ?? ""
+          tile.titleLabel.text = val.keys.first ?? ""
+    }
+  }
+
+  func configureUI() {
+    backgroundColor = .defaultBackgroundCellColor
+    addSubview(scrollView)
+    scrollView.showsHorizontalScrollIndicator = false
+    scrollView.showsVerticalScrollIndicator = false
+    scrollView.snp.makeConstraints { (maker) in
+      maker.height.equalTo(90)
+      maker.leading.equalToSuperview()
+      maker.trailing.equalToSuperview()
+      maker.bottom.equalToSuperview().priority(.medium)
+      maker.top.equalToSuperview()
+    }
+
     var lastView: UIView?
-    let views = makeTiles(item: item)
-    for i in 0..<views.count {
-      let view = views[i]
-      let isTheLastOne = (i == views.count)
+    self.tiles = makeTiles()
+    for i in 0..<self.tiles.count {
+      let view = self.tiles[i]
+      let isTheLastOne = (i == self.tiles.count - 1)
       scrollView.addSubview(view)
 
       view.snp.makeConstraints { (maker) in
@@ -65,10 +76,10 @@ class ShowcaseCell: BaseCell {
         } else {
           maker.leading.equalTo(lastView!.snp.trailing).offset(8)
         }
-        maker.top.equalToSuperview()
+        maker.top.equalToSuperview().offset(7)
         maker.bottom.equalToSuperview()
-        maker.height.equalTo(83).priority(.medium)
-        maker.width.equalTo(153)
+        maker.height.equalTo(view.bounds.height).priority(.medium)
+        maker.width.equalTo(view.bounds.width)
         if isTheLastOne {
           maker.trailing.equalToSuperview()
         }
@@ -77,50 +88,61 @@ class ShowcaseCell: BaseCell {
     }
   }
 
-  func makeTiles(item: ShowcaseCellItem) -> [UIView] {
-    var newTiles = [UIView]()
+  func makeTiles() -> [TileView] {
+    let playedTile = TileView.makeTile(title: "",//"Played",
+                              value: "",//item.hoursPlayed ?? "0 h",
+                              size: CGSize(width: 153, height: 83),
+                              color: UIColor(red: 0.165, green: 0.2, blue: 0.596, alpha: 1))
 
-    let playedTile = makeTile(title: "Played",
-                              value: "1000 h",
-                              size: CGSize(width: 153, height: 83),
-                              color: .blue)
-    
-    let playedTile1 = makeTile(title: "Played",
-                              value: "1000 h",
-                              size: CGSize(width: 153, height: 83),
-                              color: .red)
-    
-    return [playedTile, playedTile1]
+    let friendsTile = TileView.makeTile(title: "",//"Friends",
+                               value: "",//"\(item.friendsCount ?? 0)",
+                               size: CGSize(width: 83, height: 83),
+                               color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
+
+    let gamesTile = TileView.makeTile(title: "",//"Games",
+                             value: "",//"\(item.gamesCount ?? 0)",
+                             size: CGSize(width: 83, height: 83),
+                             color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
+
+    return [playedTile, friendsTile, gamesTile]
   }
 
-  func makeTile(title: String, value: String, size: CGSize, color: UIColor) -> UIView {
-    let view = UIView(frame: .zero)
+}
+
+class TileView: UIView {
+
+  var titleLabel: UILabel! = UILabel(frame: .zero)
+  var valueLabel: UILabel! = UILabel(frame: .zero)
+
+  static func makeTile(title: String, value: String, size: CGSize, color: UIColor) -> TileView {
+    let view = TileView(frame: CGRect(origin: .zero, size: size))
     view.layer.cornerRadius = 6.0
     view.backgroundColor = color
 
-    let titleLabel = UILabel(frame: .zero)
-    titleLabel.text = title
-    titleLabel.textColor = .white
-    titleLabel.font = UIFont.systemFont(ofSize: 12.0)
-    view.addSubview(titleLabel)
+    view.titleLabel.text = title
+    view.titleLabel.adjustsFontSizeToFitWidth = true
+    view.titleLabel.textColor = .white
+    view.titleLabel.font = UIFont.systemFont(ofSize: 12.0)
+    view.addSubview(view.titleLabel)
 
-    titleLabel.snp.makeConstraints { (maker) in
+    view.titleLabel.snp.makeConstraints { (maker) in
       maker.leading.equalTo(view).offset(8)
       maker.bottom.equalTo(view).offset(-8)
       maker.trailing.equalTo(view).offset(2)
     }
 
-    let valueLabel = UILabel(frame: .zero)
-    valueLabel.text = value
-    valueLabel.textColor = .white
-    view.addSubview(valueLabel)
+    view.valueLabel.adjustsFontSizeToFitWidth = true
+    view.valueLabel.text = value
+    view.valueLabel.font = UIFont.systemFont(ofSize: 28.0)
+    view.valueLabel.numberOfLines = 1
+    view.valueLabel.textColor = .white
+    view.addSubview(view.valueLabel)
 
-    valueLabel.snp.makeConstraints { (maker) in
+    view.valueLabel.snp.makeConstraints { (maker) in
       maker.leading.equalTo(view).offset(8)
       maker.top.equalTo(view).offset(8)
       maker.trailing.equalTo(view).offset(2)
     }
     return view
   }
-
 }

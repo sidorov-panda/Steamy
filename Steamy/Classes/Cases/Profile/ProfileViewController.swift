@@ -26,11 +26,7 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView = UITableView(frame: .zero, style: .grouped) {
-    didSet {
-
-    }
-  }
+  var tableView = UITableView(frame: .zero, style: .grouped)
 
   // MARK: -
 
@@ -66,13 +62,14 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
   }
 
   func configureUI() {
-    tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
+    view.addSubview(tableView)
     view.backgroundColor = .defaultBackgroundCellColor
     tableView.tableFooterView = UIView()
     tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.estimatedRowHeight = 55
     tableView.rowHeight = UITableView.automaticDimension
-    self.view.addSubview(tableView)
+    tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    tableView.separatorStyle = .none
 
     tableView.snp.makeConstraints({ (maker) in
       maker.leading.equalTo(self.view)

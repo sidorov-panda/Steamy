@@ -10,7 +10,7 @@ import Foundation
 
 fileprivate let SteamAPIBaseURLString = "http://api.steampowered.com"
 fileprivate let SteamStoreAPIBaseURLString = "https://store.steampowered.com"
-fileprivate let SteamAPIKey = "85C8BD436F4D49C79B574B6BAD2D23C6"//"100170AD8C821B6B6948EA460DD9F89D"
+fileprivate let SteamAPIKey = "100170AD8C821B6B6948EA460DD9F89D"//"85C8BD436F4D49C79B574B6BAD2D23C6"
 
 class SteamAPI {
 

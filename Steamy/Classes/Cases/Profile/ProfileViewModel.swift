@@ -57,6 +57,16 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       self.createSections()
     }
 
+    self.dependencies.userManager.badges(userId: userId) { (badges, error) in
+      self.badgesCount = badges?.count ?? 0
+      self.createSections()
+    }
+
+    self.dependencies.userManager.friends(userId: userId) { (users, error) in
+      self.friendsCount = users?.count ?? 0
+      self.createSections()
+    }
+
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
       self?.didTap(on: indexPath)
       }).disposed(by: disposeBag)
@@ -78,25 +88,25 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   func createSections() {
     var sctns = [BaseTableSectionItem]()
 
-    if self.games.count > 0 {
+    if games.count > 0 && badgesCount != nil && friendsCount != nil {
       let totalPlayedComponents = (games.reduce(0, {(result: Int, item: UserGame) -> Int in
         return result + (item.playtime ?? 0)
       })*60).secondsToHoursMinutesSeconds()
       var totalPlayedString = ""
       if totalPlayedComponents.0 > 0 {
-        totalPlayedString = "\(totalPlayedComponents.0) h."
-      }
-      if totalPlayedComponents.1 > 0 {
-        if totalPlayedString != "" {
-          totalPlayedString += " "
-        }
+        totalPlayedString = "\(totalPlayedComponents.0) h"
+      } else if totalPlayedComponents.1 > 0 {
         totalPlayedString += "\(totalPlayedComponents.1) min"
       }
 
-      let totalPlayedCell = ShowcaseCellItem(reuseIdentifier: "ShowcaseCell", identifier: "ShowcaseCell")
+      let totalPlayedCell = ShowcaseCellItem(reuseIdentifier: "ShowcaseCell",
+                                             identifier: "ShowcaseCell")
       totalPlayedCell.hoursPlayed = totalPlayedString
-      totalPlayedCell.friendsCount = 20
-      let totalPlayedSection = BaseTableSectionItem(header: " ", items: [totalPlayedCell])
+      totalPlayedCell.friendsCount = friendsCount ?? 0
+      totalPlayedCell.badgesCount = badgesCount ?? 0
+      totalPlayedCell.gamesCount = games.count
+      var totalPlayedSection = BaseTableSectionItem(header: "ACHIEVEMENT SHOWCASE", items: [totalPlayedCell])
+      totalPlayedSection.identifier = "TotalPlayedSection"
       sctns.append(totalPlayedSection)
     }
 
@@ -105,14 +115,14 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       return (game1.playtime ?? 0) > (game2.playtime ?? 0)
     })[safe: 0..<3] ?? []).map { (game) -> ActivityCellItem in
       let gameCellItem = ActivityCellItem(reuseIdentifier: "ActivityCell",
-                                      identifier: "ActivityCell_\(game.id ?? 0)")
-      
+                                          identifier: "ActivityCell_\(game.id ?? 0)")
+
       gameCellItem.gameName = game.name
       gameCellItem.gameIconURL = game.iconURL
       let playedTimeComponents = ((game.playtime2weeks ?? 0) * 60).secondsToHoursMinutesSeconds()
       var timePlayed = ""
       if (playedTimeComponents.0) > 0 {
-        timePlayed += "\(playedTimeComponents.0) h."
+        timePlayed += "\(playedTimeComponents.0) h"
       }
       if (playedTimeComponents.1) > 0 {
         if timePlayed != "" {
@@ -140,11 +150,13 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       let favoriteGame = FavoriteGameCellItem(reuseIdentifier: "FavoriteGameCell",
                                               identifier: "FavoriteGame_\(favoriteGameid)")
       favoriteGame.image = UIImage(named: "favoriteGameLogo")
-      let favoriteSection = BaseTableSectionItem(header: "FAVORITE GAME", items: [favoriteGame])
+      var favoriteSection = BaseTableSectionItem(header: "FAVORITE GAME", items: [favoriteGame])
+      favoriteSection.identifier = "FavoriteSection"
       sctns.append(favoriteSection)
     }
 
-    let section = BaseTableSectionItem(header: "GAMES", items: gameCells)
+    var section = BaseTableSectionItem(header: "GAMES", items: gameCells)
+    section.identifier = "GamesSection"
     sctns.append(section)
     sectionsRelay.accept(sctns)
   }
@@ -172,4 +184,7 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       self.showControllerSubject.onNext(userViewController)
     }
   }
+
+  // MARK: - CellItems
+
 }

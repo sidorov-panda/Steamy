@@ -18,6 +18,6 @@ class Badge: Mappable {
   }
 
   func mapping(map: Map) {
-    id <- map["id"]
+    id <- map["badgeid"]
   }
 }
