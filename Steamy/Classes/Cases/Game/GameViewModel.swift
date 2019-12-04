@@ -27,10 +27,10 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
   struct Input {
     var viewDidLoad: AnyObserver<Void>
+    var didTapCell: AnyObserver<IndexPath>
   }
 
   struct Output {
-    var backgroundImage: Observable<URL?>
     var headerImage: Observable<URL?>
     var title: Observable<String?>
     var isLoading: Observable<Bool>
@@ -43,18 +43,21 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
   // MARK: -
 
-  private var backgroundImageSubject = PublishSubject<URL?>()
   private var headerImageSubject = PublishSubject<URL?>()
   private var titleSubject = PublishSubject<String?>()
   private var isLoadingSubject = PublishSubject<Bool>()
   private var viewDidLoadSubject = PublishSubject<Void>()
   private var imagesSubject = PublishSubject<[InputSource]>()
   private var sectionsRelay = BehaviorRelay<[BaseTableSectionItem]>(value: [])
+  private var didTapCellSubject = PublishSubject<IndexPath>()
 
   // MARK: -
-  
+
   var achievementsOnPage = 3
   var statsOnPage = 3
+
+  var shouldShowAllAchievements = false
+  var shouldShowAllStats = false
 
   var dependencies: GameViewModelDependency
   var gameId: Int
@@ -73,9 +76,9 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    self.input = Input(viewDidLoad: viewDidLoadSubject.asObserver())
-    self.output = Output(backgroundImage: backgroundImageSubject.asObservable(),
-                         headerImage: headerImageSubject.asObservable(),
+    self.input = Input(viewDidLoad: viewDidLoadSubject.asObserver(),
+                       didTapCell: didTapCellSubject.asObserver())
+    self.output = Output(headerImage: headerImageSubject.asObservable(),
                          title: titleSubject.asObservable(),
                          isLoading: isLoadingSubject.asObservable(),
                          sections: sectionsRelay.asObservable(),
@@ -85,6 +88,24 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       self?.isLoadingSubject.onNext(true)
       self?.getGameInfo()
       self?.getAchievements()
+    }).disposed(by: disposeBag)
+
+    didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
+      guard let section = self?.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
+        return
+      }
+      if
+        section.identifier == "TitleCellAchievements_ShowAll" ||
+        section.identifier == "TitleCellAchievements_HideAll" {
+        self?.shouldShowAllAchievements = !(self?.shouldShowAllAchievements ?? false)
+        self?.createSections()
+      }
+      if
+        section.identifier == "TitleCellStats_ShowAll" ||
+        section.identifier == "TitleCellStats_HideAll" {
+        self?.shouldShowAllStats = !(self?.shouldShowAllStats ?? false)
+        self?.createSections()
+      }
     }).disposed(by: disposeBag)
   }
 
@@ -137,6 +158,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   func getGameInfo() {
     self.dependencies.gameManager.game(id: gameId).do(onNext: { [weak self] (game) in
       self?.game = game
+      self?.createSections()
     }, afterNext: { [weak self] (game) in
       self?.createSections()
       self?.titleSubject.onNext(game?.name)
@@ -153,9 +175,6 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
         }.filter { $0 != nil } as? [InputSource]
         self?.imagesSubject.onNext(sources ?? [])
       }
-      if let backgroundImage = game?.backgroundImageURL {
-        self?.backgroundImageSubject.onNext(backgroundImage)
-      }
     }, onError: { (error) in
       //Show error
     }, onCompleted: { [weak self] in
@@ -165,47 +184,75 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     }).subscribe().disposed(by: disposeBag)
   }
 
+  // MARK: -
+
   func createSections() {
     var sctns = [BaseTableSectionItem]()
     var cells = [BaseCellItem]()
 
     if isFavoriteGame {
-      let chartCell = ChartCellItem(reuseIdentifier: "ChartCell", identifier: "ChartCell")
-
-//      var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
-//      for (key, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
-//        for (kk, vv) in value {
-//          if preparedData[key] == nil {
-//            preparedData[key] = [:]
-//          }
-//          preparedData[key]?[kk] = (vv.0 ?? kk, UIColor.red, vv.1)
-//        }
-//      }
-
+      let chartCell = ChartCellItem(reuseIdentifier: "ChartCell",
+                                    identifier: "ChartCell")
       chartCell.data = chartData()
+
       var chartSection = BaseTableSectionItem(header: " ", items: [chartCell])
       chartSection.identifier = "ChartSection"
       sctns.append(chartSection)
     }
 
-    // Building Achievement Section
-    if self.achievments.count > 0 {
+    if achievments.count > 0 || userStats.count > 0 {
+      let gameStatCell = TwoTileCellItem(reuseIdentifier: "TwoTileCell",
+                                         identifier: "TwoTileCell")
+      if achievments.count > 0 {
+        gameStatCell.firstTileKey = "Achievements"
+        gameStatCell.firstTileValue = "\(achievments.count)"
+      }
+
+      if userStats.count > 0 && achievments.count > 0 {
+        gameStatCell.secondTileKey = "Stats"
+        gameStatCell.secondTileValue = "\(userStats.count)"
+      } else if achievments.count == 0 {
+        gameStatCell.firstTileKey = "Stats"
+        gameStatCell.firstTileValue = "\(userStats.count)"
+      }
+
       var achievementsCells = [BaseCellItem]()
-      let achCells = (self.achievments[safe: 0..<achievementsOnPage] ?? []).map { (achie) -> BaseCellItem in
-        let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                    identifier: "TitleCellAchievements_\(achie.name ?? String.random())")
-        achCell.title = achie.displayName ?? achie.name
-        return achCell
+      achievementsCells.append(gameStatCell)
+
+      var achievementsSection = BaseTableSectionItem(header: " ", items: achievementsCells)
+      achievementsSection.identifier = "AchievementsShowcaseSection"
+      if achievementsCells.count > 0 {
+        sctns.append(achievementsSection)
+      }
+    }
+
+    // Building Achievement Section
+    if achievments.count > 0 {
+      var achievementsCells = [BaseCellItem]()
+      let achCells = (achievments[safe: 0..<(shouldShowAllAchievements ? achievments.count : achievementsOnPage)] ?? [])
+        .map { (achie) -> BaseCellItem in
+          let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                      identifier: "TitleCellAchievements_\(achie.name ?? String.random())")
+          achCell.title = achie.displayName ?? achie.name
+          return achCell
       }
       achievementsCells.append(contentsOf: achCells)
 
-      if self.achievments.count > achievementsOnPage {
-        let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                    identifier: "TitleCellAchievements_SeeAll")
-        achCell.title = "See All Achievements"
-        achievementsCells.append(achCell)
+      if achievments.count > achievementsOnPage {
+        if shouldShowAllAchievements {
+          let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                      identifier: "TitleCellAchievements_ShowAll")
+          achCell.title = "Hide Achievements"
+          achievementsCells.append(achCell)
+        } else {
+          let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                      identifier: "TitleCellAchievements_HideAll")
+          achCell.title = "See All Achievements"
+          achievementsCells.append(achCell)
+        }
       }
-      var achievementsSection = BaseTableSectionItem(header: "You have \(self.achievments.count) achievements", items: achievementsCells)
+      var achievementsSection = BaseTableSectionItem(header: "Achievements",
+                                                     items: achievementsCells)
       achievementsSection.identifier = "AchievementsSection"
       if achievementsCells.count > 0 {
         sctns.append(achievementsSection)
@@ -215,23 +262,32 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     // Building Stats Section
     if userStats.count > 0 {
       var userStatsCells = [BaseCellItem]()
-      let statCells = (self.userStats[safe: 0..<statsOnPage] ?? []).map { (stat) -> BaseCellItem in
-        let statCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                     identifier: "TitleCellStats_\(stat.name ?? "")")
-        let leftPart = stat.displayName ?? stat.name ?? ""
-        let rightPart: String = stat.value != nil ? String(stat.value ?? 0) : ""
+      let statCells = (userStats[safe: 0..<(shouldShowAllStats ? userStats.count : statsOnPage)] ?? [])
+        .map { (stat) -> BaseCellItem in
+          let statCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                       identifier: "TitleCellStats_\(stat.name ?? "")")
+          let leftPart = stat.displayName ?? stat.name ?? ""
+          let rightPart: String = stat.value != nil ? String(stat.value ?? 0) : ""
 
-        statCell.title = "\(leftPart): \(rightPart)"
-        return statCell
+          statCell.title = "\(leftPart): \(rightPart)"
+          return statCell
       }
       userStatsCells.append(contentsOf: statCells)
 
-      if self.userStats.count > statsOnPage {
-        let userStatsCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                          identifier: "TitleCellStats_SeeAll")
-        userStatsCell.title = "See All Stats"
-        userStatsCells.append(userStatsCell)
+      if userStats.count > statsOnPage {
+        if shouldShowAllStats {
+          let userStatsCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                            identifier: "TitleCellStats_HideAll")
+          userStatsCell.title = "Hide Stats"
+          userStatsCells.append(userStatsCell)
+        } else {
+          let userStatsCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                            identifier: "TitleCellStats_ShowAll")
+          userStatsCell.title = "See All Stats"
+          userStatsCells.append(userStatsCell)
+        }
       }
+
       var statsSection = BaseTableSectionItem(header: "Stats", items: userStatsCells)
       statsSection.identifier = "StatsSection"
       if userStatsCells.count > 0 {
@@ -240,24 +296,26 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     }
 
     // Building Game Info Section
-    let priceCell = GameInfoCellItem(reuseIdentifier: "GameInfoCell",
-                                     identifier: "GameInfoCell_Price")
-    priceCell.attributedText = NSAttributedString(html: self.game?.price ?? "")
-    cells.append(priceCell)
+    if self.game != nil {
+      let priceCell = TextCellItem(reuseIdentifier: "TextCell",
+                                   identifier: "GameInfoCell_Price")
+      priceCell.text = (self.game?.isFree ?? false) ? "Free" : self.game?.price?.htmlStripped
+      cells.append(priceCell)
 
-    let descCell = GameInfoCellItem(reuseIdentifier: "GameInfoCell",
-                                    identifier: "GameInfoCell_Desc")
-    descCell.attributedText = NSAttributedString(html: self.game?.detailedDesc ?? "")
-    cells.append(descCell)
+      let aboutCell = TextCellItem(reuseIdentifier: "TextCell",
+                                       identifier: "GameInfoCell_About")
+      aboutCell.text = self.game?.aboutDesc?.htmlStripped
+      cells.append(aboutCell)
 
-    let aboutCell = GameInfoCellItem(reuseIdentifier: "GameInfoCell",
-                                     identifier: "GameInfoCell_About")
-    aboutCell.attributedText = NSAttributedString(html: self.game?.aboutDesc ?? "")
-    cells.append(aboutCell)
+      let descCell = TextCellItem(reuseIdentifier: "TextCell",
+                                      identifier: "GameInfoCell_Desc")
+      descCell.text = self.game?.detailedDesc?.htmlStripped
+      cells.append(descCell)
 
-    var section = BaseTableSectionItem(header: " ", items: cells)
-    section.identifier = "BaseTableSection_1"
-    sctns.append(section)
+      var section = BaseTableSectionItem(header: " ", items: cells)
+      section.identifier = "BaseTableSection_1"
+      sctns.append(section)
+    }
     sectionsRelay.accept(sctns)
   }
 
@@ -266,14 +324,13 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   func chartData() -> [Date: [String: (String, UIColor, Int)]] {
     var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
     for (date, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
-      for (name, vv) in value {
+      for (color, (name, vv)) in zip([UIColor.red, UIColor.blue], value) {
         if preparedData[date] == nil {
           preparedData[date] = [:]
         }
-        preparedData[date]?[name] = (vv.0 ?? name, .red, vv.1)
+        preparedData[date]?[name] = (vv.0 ?? name, color, vv.1)
       }
     }
     return preparedData
   }
-
 }

@@ -10,7 +10,11 @@ import Foundation
 import RxSwift
 import RealmSwift
 
-class AppManager {
+protocol DataCollector {
+  func collectData(userId: Int, gameId: Int)
+}
+
+class AppManager: DataCollector {
 
   // MARK: -
 
@@ -39,11 +43,7 @@ class AppManager {
 
   let realm = try! Realm()
 
-  func collectData() {
-    guard let userId = Session.shared.userId else {
-      return
-    }
-    let gameId = Session.shared.gameId
+  func collectData(userId: Int, gameId: Int) {
 
     let steamAPIProvider = UserManagerSteamAPIProvider()
     steamAPIProvider.cacheEnabled = false

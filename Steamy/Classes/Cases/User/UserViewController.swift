@@ -59,7 +59,7 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
 
   // MARK: -
 
-  var scrollView: UIScrollView = UIScrollView()
+  var scrollView = UIScrollView()
 
   let userInfoView = UserInfoView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
 
@@ -72,7 +72,7 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
     self.view.addSubview(scrollView)
 
     userInfoView.snp.makeConstraints { (maker) in
-      maker.top.equalTo(self.view).offset(60)
+      maker.top.equalTo(self.view).offset(100)
       maker.leading.equalTo(self.view)
       maker.trailing.equalTo(self.view)
       maker.height.equalTo(83)

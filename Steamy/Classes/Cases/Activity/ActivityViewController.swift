@@ -28,7 +28,7 @@ class ActivityViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView: UITableView = UITableView(frame: .zero, style: .grouped)
+  var tableView = UITableView(frame: .zero, style: .grouped)
 
   // MARK: -
 
@@ -76,6 +76,8 @@ class ActivityViewController: BaseViewController, ControllerProtocol {
     view.backgroundColor = .defaultBackgroundCellColor
     tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.tableFooterView = UIView()
+    tableView.separatorStyle = .none
+
     if #available(iOS 11.0, *) {
       tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
     }

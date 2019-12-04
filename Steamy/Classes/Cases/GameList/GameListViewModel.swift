@@ -82,8 +82,6 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
   var games: [UserGame] = []
 
   func createSections() {
-    var sctns = [BaseTableSectionItem]()
-
     var gameCells: [BaseCellItem] = self.games.sorted(by: { (game1, game2) -> Bool in
       return (game1.playtime ?? 0) > (game2.playtime ?? 0)
     }).map { (game) -> GameCellItem in

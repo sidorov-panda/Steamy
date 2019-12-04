@@ -89,60 +89,20 @@ class ShowcaseCell: BaseCell {
   }
 
   func makeTiles() -> [TileView] {
-    let playedTile = TileView.makeTile(title: "",//"Played",
-                              value: "",//item.hoursPlayed ?? "0 h",
-                              size: CGSize(width: 153, height: 83),
-                              color: UIColor(red: 0.165, green: 0.2, blue: 0.596, alpha: 1))
+    let playedTile = TileView.makeTile(title: "",
+                                       value: "",
+                                       size: CGSize(width: 153, height: 83),
+                                       color: UIColor(red: 0.165, green: 0.2, blue: 0.596, alpha: 1))
 
-    let friendsTile = TileView.makeTile(title: "",//"Friends",
-                               value: "",//"\(item.friendsCount ?? 0)",
-                               size: CGSize(width: 83, height: 83),
-                               color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
+    let friendsTile = TileView.makeTile(title: "",
+                                        value: "",
+                                        size: CGSize(width: 83, height: 83),
+                                        color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
 
-    let gamesTile = TileView.makeTile(title: "",//"Games",
-                             value: "",//"\(item.gamesCount ?? 0)",
-                             size: CGSize(width: 83, height: 83),
-                             color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
-
+    let gamesTile = TileView.makeTile(title: "",
+                                      value: "",
+                                      size: CGSize(width: 83, height: 83),
+                                      color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
     return [playedTile, friendsTile, gamesTile]
-  }
-
-}
-
-class TileView: UIView {
-
-  var titleLabel: UILabel! = UILabel(frame: .zero)
-  var valueLabel: UILabel! = UILabel(frame: .zero)
-
-  static func makeTile(title: String, value: String, size: CGSize, color: UIColor) -> TileView {
-    let view = TileView(frame: CGRect(origin: .zero, size: size))
-    view.layer.cornerRadius = 6.0
-    view.backgroundColor = color
-
-    view.titleLabel.text = title
-    view.titleLabel.adjustsFontSizeToFitWidth = true
-    view.titleLabel.textColor = .white
-    view.titleLabel.font = UIFont.systemFont(ofSize: 12.0)
-    view.addSubview(view.titleLabel)
-
-    view.titleLabel.snp.makeConstraints { (maker) in
-      maker.leading.equalTo(view).offset(8)
-      maker.bottom.equalTo(view).offset(-8)
-      maker.trailing.equalTo(view).offset(2)
-    }
-
-    view.valueLabel.adjustsFontSizeToFitWidth = true
-    view.valueLabel.text = value
-    view.valueLabel.font = UIFont.systemFont(ofSize: 28.0)
-    view.valueLabel.numberOfLines = 1
-    view.valueLabel.textColor = .white
-    view.addSubview(view.valueLabel)
-
-    view.valueLabel.snp.makeConstraints { (maker) in
-      maker.leading.equalTo(view).offset(8)
-      maker.top.equalTo(view).offset(8)
-      maker.trailing.equalTo(view).offset(2)
-    }
-    return view
   }
 }

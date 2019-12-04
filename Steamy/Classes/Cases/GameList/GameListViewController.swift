@@ -26,7 +26,7 @@ class GameListViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView: UITableView = UITableView()
+  var tableView = UITableView()
 
   // MARK: -
 
@@ -72,6 +72,7 @@ class GameListViewController: BaseViewController, ControllerProtocol {
   func configureUI() {
     view.backgroundColor = .defaultBackgroundColor
     tableView.backgroundColor = .defaultBackgroundCellColor
+    tableView.separatorStyle = .none
     self.view.addSubview(tableView)
 
     tableView.snp.makeConstraints({ (maker) in

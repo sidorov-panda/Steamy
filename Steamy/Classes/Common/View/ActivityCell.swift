@@ -20,7 +20,7 @@ class ActivityCellItem: BaseCellItem {
 class ActivityCell: BaseCell {
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
 
     imageView?.image = UIImage(named: "gamePlaceholderSmall")?.af_imageScaled(to: CGSize(width: 30, height: 30))
     backgroundColor = UIColor.defaultBackgroundCellColor
@@ -28,16 +28,6 @@ class ActivityCell: BaseCell {
 
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
-  }
-
-  // MARK: -
-
-  override func awakeFromNib() {
-    super.awakeFromNib()
-  }
-
-  override func setSelected(_ selected: Bool, animated: Bool) {
-    super.setSelected(selected, animated: animated)
   }
 
   // MARK: - Configurable

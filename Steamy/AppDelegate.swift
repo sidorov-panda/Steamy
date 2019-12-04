@@ -55,7 +55,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func collectData() {
-    let collector = AppManager()
-    collector.collectData()
+    if let userId = Session.shared.userId {
+      let gameId = Session.shared.gameId
+      let collector = AppManager()
+      collector.collectData(userId: userId, gameId: gameId)
+    }
   }
 }

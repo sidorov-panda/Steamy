@@ -39,16 +39,6 @@ class GameViewController: BaseViewController, ControllerProtocol {
 
     viewModel
       .output
-      .backgroundImage
-      .asDriver(onErrorJustReturn: nil)
-      .drive(onNext: { [weak self] (url) in
-        if let url = url {
-          self?.backgroundImage.af_setImage(withURL: url)
-        }
-      }).disposed(by: disposeBag)
-
-    viewModel
-      .output
       .title
       .asDriver(onErrorJustReturn: nil)
       .drive(onNext: { [weak self] (title) in
@@ -82,18 +72,19 @@ class GameViewController: BaseViewController, ControllerProtocol {
       }).disposed(by: disposeBag)
 
     //Input
+    tableView
+      .rx
+      .itemSelected
+      .asDriver()
+      .drive(viewModel.input.didTapCell)
+      .disposed(by: disposeBag)
+
     viewModel.input.viewDidLoad.onNext(())
   }
 
   // MARK: -
 
-  var tableView = UITableView(frame: .zero, style: .grouped) {
-    didSet {
-      tableView.estimatedRowHeight = 100
-      tableView.rowHeight = UITableView.automaticDimension
-    }
-  }
-  var backgroundImage = UIImageView()
+  var tableView = UITableView(frame: .zero, style: .grouped)
 
   var rxDataSource: RxTableViewSectionedAnimatedDataSource<BaseTableSectionItem>?
 
@@ -139,6 +130,8 @@ class GameViewController: BaseViewController, ControllerProtocol {
     tableView.register(GameInfoCell.self, forCellReuseIdentifier: "GameInfoCell")
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
     tableView.register(ChartCell.self, forCellReuseIdentifier: "ChartCell")
+    tableView.register(TwoTileCell.self, forCellReuseIdentifier: "TwoTileCell")
+    tableView.register(TextCell.self, forCellReuseIdentifier: "TextCell")
   }
 
   // MARK: -
@@ -148,19 +141,9 @@ class GameViewController: BaseViewController, ControllerProtocol {
   func configureUI() {
     tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.tableFooterView = UIView()
-    tableView.estimatedRowHeight = 55
+    tableView.estimatedRowHeight = 100
     tableView.rowHeight = UITableView.automaticDimension
-
-    backgroundImage.contentMode = .scaleAspectFill
-    backgroundImage.clipsToBounds = true
-//    view.addSubview(backgroundImage)
-//    tableView.backgroundView = backgroundImage
-//    backgroundImage.snp.makeConstraints { (maker) in
-//      maker.top.equalTo(self.view)
-//      maker.leading.equalTo(self.view)
-//      maker.trailing.equalTo(self.view)
-//      maker.bottom.equalTo(self.view)
-//    }
+    tableView.separatorStyle = .none
 
     view.addSubview(tableView)
     tableView.snp.makeConstraints { (maker) in

@@ -27,8 +27,9 @@ class ProfileRouter: BaseRouter {
     steamAPI.cacheEnabled = true
     guard
       let userViewModel = ProfileViewModel(userId: userId,
-                                           favoriteGameid: Session.shared.userId == userId ? Session.shared.gameId : nil,
-                                           dependencies: ProfileViewModelDependency(userManager: userManager)) else {
+                                           favoriteGameid: Session.shared.gameId,
+                                           shouldShowFavoriteGame: Session.shared.userId == userId,
+                                           dependencies: ProfileViewModelDependency(userManager: userManager, statisticCollector: AppManager())) else {
         return nil
     }
     let userVC = ProfileViewController()

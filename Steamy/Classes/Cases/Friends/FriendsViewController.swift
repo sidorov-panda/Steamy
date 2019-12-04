@@ -72,10 +72,11 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
   func configureUI() {
     view.backgroundColor = .defaultBackgroundColor
     tableView.backgroundColor = .defaultBackgroundCellColor
+    tableView.separatorStyle = .none
+
     if #available(iOS 11.0, *) {
       tableView.contentInset = UIEdgeInsets(top: -15, left: 0, bottom: 0, right: 0)
     }
-
     self.view.addSubview(tableView)
 
     tableView.snp.makeConstraints({ (maker) in

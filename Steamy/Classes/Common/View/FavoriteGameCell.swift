@@ -21,16 +21,7 @@ class FavoriteGameCell: BaseCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-    backgroundColor = UIColor.defaultBackgroundCellColor
-    self.addSubview(gameImageView)
-    gameImageView.contentMode = .scaleAspectFit
-    gameImageView.clipsToBounds = true
-    gameImageView.snp.makeConstraints { (maker) in
-      maker.leading.equalTo(self).offset(12)
-      maker.trailing.equalTo(self).offset(-12)
-      maker.topMargin.equalTo(self)
-      maker.bottomMargin.equalTo(self)
-    }
+    configureUI()
   }
 
   required init?(coder: NSCoder) {
@@ -46,6 +37,21 @@ class FavoriteGameCell: BaseCell {
       return
     }
     gameImageView.image = item.image
+  }
+
+  // MARK: -
+
+  func configureUI() {
+    backgroundColor = UIColor.defaultBackgroundCellColor
+    self.addSubview(gameImageView)
+    gameImageView.contentMode = .scaleAspectFit
+    gameImageView.clipsToBounds = true
+    gameImageView.snp.makeConstraints { (maker) in
+      maker.leading.equalTo(self).offset(8)
+      maker.trailing.greaterThanOrEqualTo(self).offset(-12)
+      maker.topMargin.equalTo(self)
+      maker.bottomMargin.equalTo(self)
+    }
   }
 
   // MARK: -
