@@ -21,9 +21,12 @@ class ChartXAxisFormatter: NSObject {
 }
 
 extension ChartXAxisFormatter: IAxisValueFormatter {
+
   func stringForValue(_ value: Double, axis: AxisBase?) -> String {
-    guard let dateFormatter = dateFormatter,
-    let referenceTimeInterval = referenceTimeInterval
+    dateFormatter?.dateFormat = "dd.MM.yyyy"
+    guard
+      let dateFormatter = dateFormatter,
+      let referenceTimeInterval = referenceTimeInterval
     else {
         return ""
     }

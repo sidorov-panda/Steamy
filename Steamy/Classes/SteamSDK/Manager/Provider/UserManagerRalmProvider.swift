@@ -13,6 +13,8 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
 
   private let realm = try! Realm()
 
+  var cacheEnabled: Bool = false
+
   func userData(with userid: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }

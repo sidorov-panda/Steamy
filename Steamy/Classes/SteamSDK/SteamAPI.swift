@@ -168,7 +168,7 @@ class SteamAPI {
     }
   }
 
-  func request(_ method: Method, params: [String: Any] = [:], completion: ((Response?, Error?) -> ())?) {
+  func request(_ method: Method, params: [String: Any] = [:], refresh: Bool = false, completion: ((Response?, Error?) -> ())?) {
     var response: Response?
     var error: Error?
 
@@ -178,7 +178,7 @@ class SteamAPI {
       return
     }
 
-    self.httpClient.getRequest(url, params: params) { (response) in
+    self.httpClient.getRequest(url, params: params, refresh: refresh) { (response) in
       completion?(response.0 as? Response, response.1)
     }
   }

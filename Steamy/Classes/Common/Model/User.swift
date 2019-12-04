@@ -43,6 +43,16 @@ class User: Mappable {
 
 ///Using different model, so we will gave a better flexibility in storing additional fields
 class UserDB: Object {
+  
+  enum Fields: String {
+    case steamidPk
+    case name
+    case avatarURL
+    case nickname
+    case countryCode
+    case stateCode
+    case cityCode
+  }
 
   //Realm-use only
   @objc dynamic var steamidPk: String?
@@ -64,6 +74,11 @@ class UserDB: Object {
 }
 
 class FriendDB: Object {
+  
+  enum Fields: String {
+    case steamidPk
+    case userId
+  }
 
   //Realm-use only
   @objc dynamic var steamidPk: String?

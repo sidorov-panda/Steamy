@@ -10,6 +10,6 @@ import Foundation
 
 protocol HTTPClientProtocol {
   typealias HTTPClientResponse = (Any?, Error?)
-  func getRequest(_ url: URL, params: [String: Any], completion: @escaping ((HTTPClientResponse) -> ()))
+  func getRequest(_ url: URL, params: [String: Any], refresh: Bool, completion: @escaping ((HTTPClientResponse) -> ()))
   func postRequest(_ url: URL, params: [String: Any], completion: @escaping ((HTTPClientResponse) -> ()))
 }

@@ -11,8 +11,9 @@ import Alamofire
 
 class HTTPClient: HTTPClientProtocol {
 
-  func getRequest(_ url: URL, params: [String: Any] = [:], completion: @escaping ((HTTPClientResponse) -> ())) {
-    Alamofire.request(url, method: .get, parameters: params, encoding: URLEncoding.default, headers: nil).responseJSON { (response) in
+  func getRequest(_ url: URL, params: [String: Any] = [:], refresh: Bool = false, completion: @escaping ((HTTPClientResponse) -> ())) {
+    let request = URLRequest(url: url, cachePolicy: refresh ? .reloadIgnoringLocalAndRemoteCacheData : .returnCacheDataElseLoad, timeoutInterval: 25)
+    Alamofire.request(request).responseJSON { (response) in
       completion((response.value, response.error))
     }
   }

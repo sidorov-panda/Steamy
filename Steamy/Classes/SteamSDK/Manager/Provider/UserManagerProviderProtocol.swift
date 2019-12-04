@@ -11,6 +11,7 @@ import Foundation
 //Methods have postfix "data" because most of it returns raw dicts
 protocol UserManagerProviderProtocol {
   typealias JSONObject = [String: Any]
+  var cacheEnabled: Bool { get set }
   func userData(with userid: Int, completion: ((JSONObject?, Error?) -> ())?)
   func usersData(with ids: [Int], completion: ((JSONObject?, Error?) -> ())?)
   func ownedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)

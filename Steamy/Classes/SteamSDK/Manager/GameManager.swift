@@ -11,6 +11,7 @@ import ObjectMapper
 
 protocol GameManagerProviderProtocol {
   typealias JSONObject = [String: Any]
+  var cacheEnabled: Bool { get set }
   func gameData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
   func gameStatData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
 }
@@ -20,20 +21,22 @@ class GameManagerSteamAPIProvider: GameManagerProviderProtocol {
   //Using HTTP as a transport
   let steamAPI = SteamAPI(httpClient: HTTPClient())
 
+  var cacheEnabled: Bool = false
+
   func gameData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.gameInfo(gameId: id)) { (response, error) in
+    steamAPI.request(.gameInfo(gameId: id), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func gameStatData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.gameSchema(gameId: id)) { (response, error) in
+    steamAPI.request(.gameSchema(gameId: id), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 }
 
-class GameManager {
+class GameManager: BaseManager {
 
   enum GameManagerError: Error {
     case wrongResponse
@@ -69,7 +72,7 @@ class GameManager {
       game = Mapper<Game>().map(JSON: data)
     }
   }
-  
+
   func gameStats(id: Int, completion: (([GameStat]?, [GameAchievement]?, Error?) -> ())?) {
     self.provider.gameStatData(with: id) { (response, error) in
       var stats: [GameStat]?

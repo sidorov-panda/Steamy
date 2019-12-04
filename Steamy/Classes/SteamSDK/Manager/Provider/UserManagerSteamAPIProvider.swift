@@ -20,8 +20,10 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
   //Using HTTP as a transport
   let steamAPI = SteamAPI(httpClient: HTTPClient())
 
+  var cacheEnabled: Bool = false
+
   func userData(with id: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.user(id: id)) { (response, error) in
+    steamAPI.request(.user(id: id), refresh: !cacheEnabled) { (response, error) in
 
       var resp: JSONObject?
       var err: Error?
@@ -36,7 +38,7 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
   }
 
   func usersData(with ids: [Int], completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.users(ids: ids)) { (response, error) in
+    steamAPI.request(.users(ids: ids), refresh: !cacheEnabled) { (response, error) in
 
       var resp: JSONObject?
       var err: Error?
@@ -51,43 +53,43 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
   }
 
   func ownedGamesData(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.ownedGames(userId: userId)) { (response, error) in
+    steamAPI.request(.ownedGames(userId: userId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func recentlyPlayedGamesData(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.recentlyPlayedGames(userId: userId)) { (response, error) in
+    steamAPI.request(.recentlyPlayedGames(userId: userId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.userLevel(id: userId)) { (response, error) in
+    steamAPI.request(.userLevel(id: userId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func achievementsData(with userId: Int, gameId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.achievements(userId: userId, gameId: gameId)) { (response, error) in
+    steamAPI.request(.achievements(userId: userId, gameId: gameId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func gameStatsData(with userId: Int, gameId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.gameStats(userId: userId, gameId: gameId)) { (response, error) in
+    steamAPI.request(.gameStats(userId: userId, gameId: gameId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func friends(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
-    steamAPI.request(.friends(userId: userId)) { (response, error) in
+    steamAPI.request(.friends(userId: userId), refresh: !cacheEnabled) { (response, error) in
       completion?(response, error)
     }
   }
 
   func badges(with userId: Int, completion: (([UserManagerSteamAPIProvider.JSONObject]?, Error?) -> ())?) {
-    steamAPI.request(.badges(userId: userId)) { (response, error) in
+    steamAPI.request(.badges(userId: userId), refresh: !cacheEnabled) { (response, error) in
       var preparedResponse = [[String: Any]]()
       var err: Error?
       defer {
@@ -105,7 +107,6 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
           err = UserManagerSteamAPIProviderError.wrongResponse
           return
       }
-
       preparedResponse = badges
     }
   }

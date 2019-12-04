@@ -10,7 +10,7 @@ import Foundation
 import ObjectMapper
 
 /// Class is used to manage User's data
-class UserManager {
+class UserManager: BaseManager {
 
   enum UserManagerError: Error {
     case noUser

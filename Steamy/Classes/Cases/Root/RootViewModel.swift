@@ -77,5 +77,4 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
         }
       }).disposed(by: disposeBag)
   }
-
 }

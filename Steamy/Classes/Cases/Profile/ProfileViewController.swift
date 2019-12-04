@@ -68,7 +68,12 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
     tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.estimatedRowHeight = 55
     tableView.rowHeight = UITableView.automaticDimension
-    tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    
+    if #available(iOS 11.0, *) {
+      tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
+    } else {
+      tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
     tableView.separatorStyle = .none
 
     tableView.snp.makeConstraints({ (maker) in

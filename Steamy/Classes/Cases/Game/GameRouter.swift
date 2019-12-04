@@ -31,6 +31,8 @@ class GameRouter: BaseRouter {
     let gameSteamAPI = GameManagerSteamAPIProvider()
     let userManager = UserManager(provider: userSteamAPI)
     let gameManager = GameManager(provider: gameSteamAPI)
+    userSteamAPI.cacheEnabled = true
+    gameSteamAPI.cacheEnabled = true
     guard
       let userViewModel = GameViewModel(
         userId: userId,

@@ -24,6 +24,7 @@ class GameListRouter: BaseRouter {
   static func gameListViewController(with userId: Int) -> UIViewController? {
     let steamAPI = UserManagerSteamAPIProvider()
     let userManager = UserManager(provider: steamAPI)
+    steamAPI.cacheEnabled = true
     guard
       let userViewModel = GameListViewModel(userId: userId,
                                            dependencies: GameListViewModelDependency(userManager: userManager)) else {

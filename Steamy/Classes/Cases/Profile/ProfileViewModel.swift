@@ -52,19 +52,19 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    self.dependencies.userManager.games(userId: userId) { (games, error) in
-      self.games = games ?? []
-      self.createSections()
+    self.dependencies.userManager.games(userId: userId) { [weak self] (games, error) in
+      self?.games = games ?? []
+      self?.createSections()
     }
 
-    self.dependencies.userManager.badges(userId: userId) { (badges, error) in
-      self.badgesCount = badges?.count ?? 0
-      self.createSections()
+    self.dependencies.userManager.badges(userId: userId) { [weak self] (badges, error) in
+      self?.badgesCount = badges?.count ?? 0
+      self?.createSections()
     }
 
-    self.dependencies.userManager.friends(userId: userId) { (users, error) in
-      self.friendsCount = users?.count ?? 0
-      self.createSections()
+    self.dependencies.userManager.friends(userId: userId) { [weak self] (users, error) in
+      self?.friendsCount = users?.count ?? 0
+      self?.createSections()
     }
 
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in

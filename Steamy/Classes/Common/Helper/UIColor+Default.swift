@@ -18,6 +18,10 @@ extension UIColor {
   static var defaultBackgroundCellColor: UIColor {
     return UIColor(red: 0.06, green: 0.06, blue: 0.18, alpha: 1.0)
   }
+  
+  static var chartColor: [UIColor] {
+    return [UIColor(red: 0.085, green: 0.085, blue: 0.392, alpha: 1), UIColor(red: 0.165, green: 0.2, blue: 0.596, alpha: 1)]
+  }
 
 }
 

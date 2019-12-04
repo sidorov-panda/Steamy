@@ -43,12 +43,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Sets shadow (line below the bar) to a blank image
     UINavigationBar.appearance().shadowImage = UIImage()
     // Sets the translucent background color
-    UINavigationBar.appearance().backgroundColor = .clear
+    UINavigationBar.appearance().backgroundColor = .defaultBackgroundCellColor
+    UINavigationBar.appearance().barTintColor = .defaultBackgroundCellColor
+    UINavigationBar.appearance().tintColor = .white
     // Set translucent. (Default value is already true, so this can be removed if desired.)
     UINavigationBar.appearance().isTranslucent = true
+    UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.white]
 
-//    UILabel.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).font = UIFont.systemFont(ofSize: 12.0)
-//    UILabel.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).textColor = UIColor(red: 0.29, green: 0.29, blue: 0.38, alpha: 1.0)
     UITableViewHeaderFooterView.appearance().backgroundColor = UIColor.defaultBackgroundCellColor
     UIView.appearance(whenContainedInInstancesOf: [UITableViewHeaderFooterView.self]).backgroundColor = UIColor.defaultBackgroundCellColor
   }

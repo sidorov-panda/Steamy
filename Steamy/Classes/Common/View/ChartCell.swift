@@ -10,9 +10,9 @@ import UIKit
 import Charts
 
 class ChartCellItem: BaseCellItem {
-  // "20 Dec": ["Kills": 30, "Deaths": 25]
-  // "21 Dec": ["Kills": 35, "Deaths": 18]
+  // "21 Dec": ["kills": ("Enemy Kills", UIColor.red, 245)]
   var data: [Date: [String: (String, UIColor, Int)]]?
+  var numberOfItemsPerPage: Int = 2
 }
 
 class ChartCell: BaseCell {
@@ -54,10 +54,12 @@ class ChartCell: BaseCell {
     var colors: [String: UIColor] = [:]
     var titles: [String: String] = [:]
     let days = (item.data ?? [:]).keys.count
-    var minYValue = 0.0
+    var maxYValue = 0.0
     var minXValue = 0.0
     var entries: [String: [BarChartDataEntry]] = [:]
-    (item.data ?? [:]).keys.forEach { (key) in
+    (item.data ?? [:]).keys.sorted(by: { (date1, date2) -> Bool in
+      return date1 <   date2
+    }).forEach { (key) in
       let xx = key.timeIntervalSince1970
       let xValue = (xx - referenceTimeInterval) / (3600 * 24)
       minXValue = (xx < minXValue) ? xx : minXValue
@@ -69,6 +71,7 @@ class ChartCell: BaseCell {
           titles[name] = val.0
           colors[name] = val.1
           entries[name]?.append(BarChartDataEntry(x: xValue, y: Double(val.2)))
+          maxYValue = max(maxYValue, Double(val.2))
         }
       })
     }
@@ -76,6 +79,7 @@ class ChartCell: BaseCell {
     var chartDataSets: [BarChartDataSet] = []
     for (key, value) in entries {
       let chartDataSet = BarChartDataSet(entries: value, label: titles[key] ?? key)
+      chartDataSet.valueColors = [UIColor(red: 0.569, green: 0.573, blue: 0.624, alpha: 1)]
       if let color = colors[key] {
         chartDataSet.colors = [color]
       }
@@ -85,20 +89,20 @@ class ChartCell: BaseCell {
     let chartData = BarChartData(dataSets: chartDataSets)
 
     // (0.2 + 0.03) * 2 + 0.54 = 1.00
-    let barSpace = 0.03
-    let barWidth = 0.2
-    let groupSpace = 0.54
+    let barSpace = 0.05
+    let barWidth = 0.3
+    let groupSpace = 0.3
     chartData.barWidth = barWidth
 
     let gpWidth = chartData.groupWidth(groupSpace: groupSpace, barSpace: barSpace)
 
     chartView.xAxis.axisMinimum = Double(0)
-    chartView.xAxis.axisMaximum = Double(0) + gpWidth * Double(4)
+    chartView.xAxis.axisMaximum = Double(0) + gpWidth * Double(days)
     chartData.groupBars(fromX: Double(0), groupSpace: groupSpace, barSpace: barSpace)
-//    chartView.setVisibleXRange(minXRange: Double(0), maxXRange: Double(10))
+    chartView.setVisibleXRange(minXRange: Double(0), maxXRange: Double(item.numberOfItemsPerPage))
     chartView.data = chartData
 
-//    chartView.moveViewToX(gpWidth)
+    chartView.moveViewToX(Double(days))
 
     // Define chart xValues formatter
     let formatter = DateFormatter()
@@ -111,7 +115,7 @@ class ChartCell: BaseCell {
     let xAxis = chartView.xAxis
     xAxis.labelPosition = .topInside
     xAxis.labelFont = .systemFont(ofSize: 10, weight: .light)
-    xAxis.labelTextColor = UIColor(red: 255/255, green: 192/255, blue: 56/255, alpha: 1)
+    xAxis.labelTextColor = .white
     xAxis.drawAxisLineEnabled = false
     xAxis.drawGridLinesEnabled = true
     xAxis.centerAxisLabelsEnabled = true
@@ -122,15 +126,17 @@ class ChartCell: BaseCell {
     rightYAxis.labelPosition = .insideChart
     rightYAxis.drawLabelsEnabled = false
     rightYAxis.drawGridLinesEnabled = false
+    rightYAxis.spaceMax = 20
+    rightYAxis.axisMaximum = maxYValue + 200
 
     let leftYAxis = chartView.leftAxis
     leftYAxis.labelPosition = .insideChart
     leftYAxis.drawLabelsEnabled = false
     leftYAxis.drawGridLinesEnabled = false
+    leftYAxis.spaceMax = 20
+    leftYAxis.axisMaximum = maxYValue + 200
 
+    chartView.legend.textColor = UIColor(red: 0.29, green: 0.294, blue: 0.376, alpha: 1)
     chartView.notifyDataSetChanged()
-    chartView.setNeedsLayout()
-    chartView.setNeedsDisplay()
-    chartView.layoutIfNeeded()
   }
 }

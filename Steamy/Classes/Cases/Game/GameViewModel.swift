@@ -172,17 +172,17 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     if isFavoriteGame {
       let chartCell = ChartCellItem(reuseIdentifier: "ChartCell", identifier: "ChartCell")
 
-      var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
-      for (key, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
-        for (kk, vv) in value {
-          if preparedData[key] == nil {
-            preparedData[key] = [:]
-          }
-          preparedData[key]?[kk] = (vv.0 ?? kk, UIColor.red, vv.1)
-        }
-      }
+//      var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
+//      for (key, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
+//        for (kk, vv) in value {
+//          if preparedData[key] == nil {
+//            preparedData[key] = [:]
+//          }
+//          preparedData[key]?[kk] = (vv.0 ?? kk, UIColor.red, vv.1)
+//        }
+//      }
 
-      chartCell.data = preparedData
+      chartCell.data = chartData()
       var chartSection = BaseTableSectionItem(header: " ", items: [chartCell])
       chartSection.identifier = "ChartSection"
       sctns.append(chartSection)
@@ -260,4 +260,20 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     sctns.append(section)
     sectionsRelay.accept(sctns)
   }
+
+  // MARK: -
+
+  func chartData() -> [Date: [String: (String, UIColor, Int)]] {
+    var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
+    for (date, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
+      for (name, vv) in value {
+        if preparedData[date] == nil {
+          preparedData[date] = [:]
+        }
+        preparedData[date]?[name] = (vv.0 ?? name, .red, vv.1)
+      }
+    }
+    return preparedData
+  }
+
 }

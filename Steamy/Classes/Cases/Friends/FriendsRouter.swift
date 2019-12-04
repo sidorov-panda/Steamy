@@ -30,7 +30,7 @@ class FriendsRouter: BaseRouter {
     } else {
       provider = UserManagerSteamAPIProvider()
     }
-
+    provider.cacheEnabled = true
     let userManager = UserManager(provider: provider)
     guard
       let friendsViewModel = FriendsViewModel(userId: userId,
