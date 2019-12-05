@@ -33,10 +33,20 @@ class RootViewController: BaseViewController, ControllerProtocol {
       .showLogin
       .asDriver(onErrorJustReturn: ())
       .drive(onNext: { (_) in
-        SteamLoginVC.login(from: self) { [weak self] (user, error) in
+        let loginVC = SteamLoginVC(loginHandler: { [weak self] (user, error) in
           if let user = user {
             self?.viewModel.input.didReceiveSteamUser.onNext(user.steamID64)
           }
+        })
+
+        loginVC.modalPresentationStyle = .overCurrentContext
+        let navigationVC = UINavigationController(rootViewController: loginVC)
+        navigationVC.modalPresentationStyle = .fullScreen
+        navigationVC.navigationBar.isTranslucent = false
+        loginVC.navigationItem.rightBarButtonItem?.tintColor = .clear
+        self.present(navigationVC, animated: false) {
+          loginVC.navigationItem.rightBarButtonItems = nil
+          loginVC.navigationItem.rightBarButtonItem = nil
         }
       }).disposed(by: disposeBag)
 

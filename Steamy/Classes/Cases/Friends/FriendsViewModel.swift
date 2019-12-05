@@ -45,8 +45,8 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
       self?.createSections()
     }
 
-    didTapCellSubject.asObserver().subscribe(onNext: { (indexPath) in
-      guard let section = self.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
+    didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
+      guard let section = self?.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
         return
       }
       if section.identifier.starts(with: "FriendCell") {
@@ -56,9 +56,9 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
           let userViewController = UserRouter.userViewController(with: userId) else {
           return
         }
-        self.showControllerSubject.onNext(userViewController)
+        self?.showControllerSubject.onNext(userViewController)
       }
-      }).disposed(by: disposeBag)
+    }).disposed(by: disposeBag)
   }
 
   var userId: Int

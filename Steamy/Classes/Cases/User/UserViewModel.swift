@@ -73,11 +73,19 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   }
 
   private func loadUserData() {
-    self.dependencies.userManager.user(id: userId) { (user, error) in
+    self.dependencies.userManager.user(id: userId) { [weak self] (user, error) in
       if let user = user {
-        self.nameSubject.onNext(user.nickname)
-        self.locationSubject.onNext(user.countryCode)
-        self.avatarSubject.onNext(user.avatarURL)
+        if
+          let countryCode = user.countryCode {
+          let geo = Geo(countryCode: countryCode, stateCode: user.stateCode, cityCode: String(user.cityCode ?? 0))
+          var location = geo.countryName ?? ""
+          if let cityName = geo.cityName {
+            location += ", \(cityName)"
+          }
+          self?.locationSubject.onNext(location)
+        }
+        self?.nameSubject.onNext(user.nickname)
+        self?.avatarSubject.onNext(user.avatarURL)
       }
     }
 

@@ -120,6 +120,8 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
         totalPlayedString = "\(totalPlayedComponents.0) h"
       } else if totalPlayedComponents.1 > 0 {
         totalPlayedString += "\(totalPlayedComponents.1) min"
+      } else {
+        totalPlayedString = "0 h"
       }
 
       let totalPlayedCell = ShowcaseCellItem(reuseIdentifier: CellReuseIdentifiers.showcase.rawValue,

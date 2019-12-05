@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     SteamLogin.steamApiKey = AppConfig.shared.steamAPIKey
 
     //!!!!!REMOVE BEFORE BUILD!!!!
-    Session.shared.userId = 76561197960434622
+//    Session.shared.userId = 76561197960434622
 
     if let rootVC = UIApplication.shared.windows.first?.rootViewController as? RootViewController {
       let rootViewModel = RootViewModel()
