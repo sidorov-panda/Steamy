@@ -10,6 +10,10 @@ import Foundation
 import RxSwift
 import RxRealm
 
+struct RootViewModelDependency {
+  var dataCollector: DataCollector
+}
+
 class RootViewModel: BaseViewModel, ViewModelProtocol {
 
   // MARK: - ViewModelProtocol
@@ -36,12 +40,16 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
 
   // MARK: -
 
-  override init() {
+  var dependencies: RootViewModelDependency
+  var favoriteGameId: Int
+
+  init(favoriteGameId: Int, dependencies: RootViewModelDependency) {
     self.input = Input(didReceiveSteamUser: didReceiveSteamUserSubject.asObserver(),
                        viewDidLoad: viewDidLoadSubject.asObserver())
     self.output = Output(showLogin: showLoginSubject.asObservable(),
                          showProfile: showProfileSubject.asObservable())
-
+    self.dependencies = dependencies
+    self.favoriteGameId = favoriteGameId
     super.init()
 
     subscribe()
@@ -58,6 +66,9 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
       })
       .subscribe(onNext: { [weak self] (userId) in
         Session.shared.userId = userId
+        if let favoriteGameId = self?.favoriteGameId {
+          self?.dependencies.dataCollector.collectData(userId: userId, gameId: favoriteGameId)
+        }
         if let userViewController = UserRouter.userViewController(with: userId) {
           self?.showProfileSubject.onNext(UINavigationController(rootViewController: userViewController))
         }

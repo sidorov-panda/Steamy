@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 @objc
-protocol BaseRouter: class {
+protocol BaseBuilder: class {
 
   static var patterns: [String] {get}
 
@@ -37,7 +37,7 @@ class Router {
 
   static func viewController(by url: URL) -> UIViewController? {
 
-    let routers = Router.shared.getClassesImplementingProtocol(prot: BaseRouter.self) as! [BaseRouter.Type] // swiftlint:disable:this force_cast
+    let routers = Router.shared.getClassesImplementingProtocol(prot: BaseBuilder.self) as! [BaseBuilder.Type] // swiftlint:disable:this force_cast
 
     var viewController: UIViewController?
 

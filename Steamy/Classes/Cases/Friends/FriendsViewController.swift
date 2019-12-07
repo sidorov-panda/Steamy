@@ -75,7 +75,7 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
     tableView.separatorStyle = .none
 
     if #available(iOS 11.0, *) {
-      tableView.contentInset = UIEdgeInsets(top: -15, left: 0, bottom: 0, right: 0)
+      tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
     self.view.addSubview(tableView)
 
@@ -113,6 +113,12 @@ class FriendsViewController: BaseViewController, ControllerProtocol {
       .itemSelected
       .asDriver()
       .drive(viewModel.input.didTapCell)
+      .disposed(by: disposeBag)
+    
+    self.rx
+      .viewWillAppear
+      .asDriver(onErrorJustReturn: false)
+      .drive(viewModel.input.viewWillAppear)
       .disposed(by: disposeBag)
   }
 }

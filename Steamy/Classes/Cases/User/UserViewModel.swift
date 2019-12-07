@@ -91,7 +91,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
 
     self.dependencies.userManager.level(userId: userId) { (level, error) in
       if let level = level {
-        self.levelSubject.onNext(String(level) + " level")
+        self.levelSubject.onNext(String(level) + " LEVEL")
       }
     }
   }

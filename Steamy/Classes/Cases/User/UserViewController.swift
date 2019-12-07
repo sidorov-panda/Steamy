@@ -66,7 +66,6 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
   func configureUI() {
     view.backgroundColor = .defaultBackgroundColor
     buttonBarView.selectedBar.layer.cornerRadius = 2.0
-    buttonBarView.backgroundColor = .clear
 
     self.view.addSubview(userInfoView)
     self.view.addSubview(scrollView)

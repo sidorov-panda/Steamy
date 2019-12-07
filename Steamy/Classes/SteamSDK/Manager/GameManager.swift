@@ -14,9 +14,14 @@ protocol GameManagerProviderProtocol {
   var cacheEnabled: Bool { get set }
   func gameData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
   func gameStatData(with id: Int, completion: ((JSONObject?, Error?) -> ())?)
+  func gameNews(with id: Int, completion: (([JSONObject]?, Error?) -> ())?)
 }
 
 class GameManagerSteamAPIProvider: GameManagerProviderProtocol {
+
+  enum GameManagerSteamAPIProviderError: Error {
+    case wrongResponse
+  }
 
   //Using HTTP as a transport
   let steamAPI = SteamAPI(httpClient: HTTPClient())
@@ -34,6 +39,24 @@ class GameManagerSteamAPIProvider: GameManagerProviderProtocol {
       completion?(response, error)
     }
   }
+
+  func gameNews(with id: Int, completion: (([JSONObject]?, Error?) -> ())?) {
+    steamAPI.request(.news(gameId: id), refresh: !cacheEnabled) { (response, error) in
+      var news: [JSONObject]?
+      var err: Error?
+
+      defer {
+        completion?(news, error)
+      }
+
+      guard let response = response?["appnews"] as? JSONObject else {
+        err = GameManagerSteamAPIProviderError.wrongResponse
+        return
+      }
+      news = response["newsitems"] as? [JSONObject]
+    }
+  }
+
 }
 
 class GameManager: BaseManager {
@@ -104,4 +127,21 @@ class GameManager: BaseManager {
       }
     }
   }
+
+  func news(gameId: Int, completion: (([Article]?, Error?) -> ())?) {
+    self.provider.gameNews(with: gameId) { (response, err) in
+      var articles: [Article]?
+      var error: Error?
+
+      defer {
+        completion?(articles, error)
+      }
+      guard let response = response, err == nil else {
+        error = err
+        return
+      }
+      articles = Mapper<Article>().mapArray(JSONArray: response)
+    }
+  }
+
 }

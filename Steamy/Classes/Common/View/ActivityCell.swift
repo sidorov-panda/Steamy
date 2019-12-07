@@ -14,7 +14,8 @@ class ActivityCellItem: BaseCellItem {
   var gameName: String?
   var activityDesc: String?
   var gameIconURL: URL?
-  var placeholderImage: UIImage? = UIImage(named: "gamePlaceholderSmall")?.af_imageScaled(to: CGSize(width: 30, height: 30))
+  var placeholderImage: UIImage? = UIImage(named: "gamePlaceholderSmall")?
+    .af_imageScaled(to: CGSize(width: 30, height: 30))
 }
 
 class ActivityCell: BaseCell {
@@ -22,7 +23,8 @@ class ActivityCell: BaseCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
 
-    imageView?.image = UIImage(named: "gamePlaceholderSmall")?.af_imageScaled(to: CGSize(width: 30, height: 30))
+    imageView?.image = UIImage(named: "gamePlaceholderSmall")?
+      .af_imageScaled(to: CGSize(width: 30, height: 30))
     backgroundColor = UIColor.defaultBackgroundCellColor
   }
 

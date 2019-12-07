@@ -8,7 +8,7 @@
 
 import UIKit
 
-class GameListRouter: BaseRouter {
+class GameListRouter: BaseBuilder {
 
   static var patterns: [String] = []
 

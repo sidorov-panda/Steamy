@@ -9,6 +9,7 @@
 import Foundation
 import RealmSwift
 
+
 class UserManagerRealmProvider: UserManagerProviderProtocol {
 
   private let realm = try! Realm()

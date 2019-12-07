@@ -79,7 +79,7 @@ class ActivityViewController: BaseViewController, ControllerProtocol {
     tableView.separatorStyle = .none
 
     if #available(iOS 11.0, *) {
-      tableView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
+      tableView.contentInset = UIEdgeInsets(top: -30, left: 0, bottom: 0, right: 0)
     }
     self.view.addSubview(tableView)
 

@@ -49,7 +49,7 @@ class FavoriteGameCell: BaseCell {
     gameImageView.snp.makeConstraints { (maker) in
       maker.leading.equalTo(self).offset(8)
       maker.trailing.greaterThanOrEqualTo(self).offset(-12)
-      maker.topMargin.equalTo(self)
+      maker.topMargin.equalTo(self).offset(16)
       maker.bottomMargin.equalTo(self)
     }
   }

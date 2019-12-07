@@ -20,6 +20,7 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
 
   struct Input {
     var didTapCell: AnyObserver<IndexPath>
+    var viewWillAppear: AnyObserver<Bool>
   }
 
   struct Output {
@@ -31,7 +32,8 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   var output: FriendsViewModel.Output!
 
   init?(userId: Int, dependencies: FriendsViewModelDependency) {
-    input = Input(didTapCell: didTapCellSubject.asObserver())
+    input = Input(didTapCell: didTapCellSubject.asObserver(),
+                  viewWillAppear: viewWillAppearSubject.asObserver())
     output = Output(sections: sectionsRelay.asObservable(),
                     showController: showControllerSubject.asObservable())
 
@@ -40,25 +42,9 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    self.dependency.userManager.friends(userId: userId) { [weak self] (users, error) in
-      self?.users = users ?? []
-      self?.createSections()
-    }
+    loadFriends()
 
-    didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
-      guard let section = self?.sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
-        return
-      }
-      if section.identifier.starts(with: "FriendCell") {
-        //show
-        guard
-          let userId = Int(section.identifier.split(separator: "_").last ?? ""),
-          let userViewController = UserRouter.userViewController(with: userId) else {
-          return
-        }
-        self?.showControllerSubject.onNext(userViewController)
-      }
-    }).disposed(by: disposeBag)
+    bind()
   }
 
   var userId: Int
@@ -71,8 +57,21 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   private var sectionsRelay = BehaviorRelay<[BaseTableSectionItem]>(value: [])
   private var didTapCellSubject = PublishSubject<IndexPath>()
   private var showControllerSubject = PublishSubject<UIViewController>()
+  private var viewWillAppearSubject = PublishSubject<Bool>()
 
-  // MARK: -
+  // MARK: - Binding
+
+  private func bind() {
+    viewWillAppearSubject.subscribe(onNext: { [weak self] (_) in
+      self?.loadFriends()
+    }).disposed(by: disposeBag)
+
+    didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
+      self?.didTapCell(on: indexPath)
+    }).disposed(by: disposeBag)
+  }
+
+  // MARK: - Sections
 
   func createSections() {
     var sctns = [BaseTableSectionItem]()
@@ -90,8 +89,40 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
       noFriendsCell.title = "No friends yet"
       friendCells.append(noFriendsCell)
     }
-    let section = BaseTableSectionItem(header: "Friends", items: friendCells)
+    var section = BaseTableSectionItem(header: "Friends", items: friendCells)
+    section.identifier = "FriendsSection"
     sctns.append(section)
     sectionsRelay.accept(sctns)
+  }
+
+  // MARK: -
+
+  func didTapCell(on indexPath: IndexPath) {
+    guard let section = sectionsRelay.value[safe: indexPath.section]?.items[safe: indexPath.row] else {
+      return
+    }
+    if section.identifier.starts(with: "FriendCell") {
+      //show
+      guard
+        let userId = Int(section.identifier.split(separator: "_").last ?? ""),
+        let userViewController = UserRouter.userViewController(with: userId) else {
+        return
+      }
+      showControllerSubject.onNext(userViewController)
+    }
+  }
+
+  // MARK: - Load
+
+  var isLoading = false
+
+  func loadFriends() {
+    guard isLoading || self.users.count == 0 else { return }
+    isLoading = true
+    self.dependency.userManager.friends(userId: userId) { [weak self] (users, error) in
+      self?.users = users ?? []
+      self?.isLoading = false
+      self?.createSections()
+    }
   }
 }

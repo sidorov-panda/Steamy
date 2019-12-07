@@ -10,19 +10,17 @@ import XCTest
 @testable import Steamy
 
 class TestHttpClient: HTTPClientProtocol {
-  func getRequest(_ url: URL, params: [String : Any], completion: ((TestHttpClient.HTTPClientResponse) -> ())) {}
+  func getRequest(_ url: URL, params: [String : Any], refresh: Bool, completion: @escaping ((TestHttpClient.HTTPClientResponse) -> ())) {}
   func postRequest(_ url: URL, params: [String : Any], completion: ((TestHttpClient.HTTPClientResponse) -> ())) {}
 }
 
 class SteamAPITests: XCTestCase {
 
-  override func setUp() {
+  override func setUp() {}
 
-  }
+  override func tearDown() {}
 
-  override func tearDown() {
-
-  }
+  // MARK: -
 
   func testAPIUserURL() {
     XCTAssert(SteamAPI.Method.user(id: 1).url()?.absoluteString == "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=100170AD8C821B6B6948EA460DD9F89D&format=json&steamids=1")
@@ -33,11 +31,11 @@ class SteamAPITests: XCTestCase {
   }
 
   func testAPIOwnedGames() {
-    XCTAssert(SteamAPI.Method.ownedGames(userId: 1).url()?.absoluteString == "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=100170AD8C821B6B6948EA460DD9F89D&format=json&steamid=1&include_played_free_games=1")
+    XCTAssert(SteamAPI.Method.ownedGames(userId: 1).url()?.absoluteString == "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=100170AD8C821B6B6948EA460DD9F89D&format=json&steamid=1&include_played_free_games=1&include_appinfo=1")
   }
 
   func testAPIFullGame() {
-    XCTAssert(SteamAPI.Method.gameInfo(gameId: 570).url()?.absoluteString == "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=100170AD8C821B6B6948EA460DD9F89D&format=json&steamid=1&include_played_free_games=1")
+    XCTAssert(SteamAPI.Method.gameInfo(gameId: 570).url()?.absoluteString == "https://store.steampowered.com/api/appdetails//?key=100170AD8C821B6B6948EA460DD9F89D&format=json&appids=570")
   }
 
 }

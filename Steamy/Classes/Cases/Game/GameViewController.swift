@@ -13,6 +13,7 @@ import AlamofireImage
 import SVProgressHUD
 import RxDataSources
 import ImageSlideshow
+import SafariServices
 
 class GameViewController: BaseViewController, ControllerProtocol {
 
@@ -70,6 +71,13 @@ class GameViewController: BaseViewController, ControllerProtocol {
           self?.tableView.tableHeaderView = nil
         }
       }).disposed(by: disposeBag)
+
+    viewModel.output.openURL.asDriver(onErrorJustReturn: nil).drive(onNext: { (url) in
+      if let url = url {
+        let viewController = SFSafariViewController(url: url)
+        self.present(viewController, animated: true, completion: nil)
+      }
+    }).disposed(by: disposeBag)
 
     //Input
     tableView
@@ -132,11 +140,13 @@ class GameViewController: BaseViewController, ControllerProtocol {
     tableView.register(ChartCell.self, forCellReuseIdentifier: "ChartCell")
     tableView.register(TwoTileCell.self, forCellReuseIdentifier: "TwoTileCell")
     tableView.register(TextCell.self, forCellReuseIdentifier: "TextCell")
+    tableView.register(KeyValueCell.self, forCellReuseIdentifier: "KeyValueCell")
+    tableView.register(ArticleCell.self, forCellReuseIdentifier: "ArticleCell")
   }
 
   // MARK: -
 
-  var slideshow = ImageSlideshow(frame: CGRect(x: 0, y: 0, width: 10, height: 100))
+  var slideshow = ImageSlideshow(frame: CGRect(x: 0, y: 0, width: 10, height: 140))
 
   func configureUI() {
     tableView.backgroundColor = .defaultBackgroundCellColor

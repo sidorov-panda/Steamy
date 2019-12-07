@@ -21,6 +21,8 @@ struct UserInfoViewItem {
 class UserInfoView: UIView {
 
   let disposeBag = DisposeBag()
+  
+  // MARK: -
 
   var nameLabel: UILabel!
   var locationLabel: UILabel!
@@ -42,25 +44,35 @@ class UserInfoView: UIView {
   // MARK: - Configure
 
   func configure(item: UserInfoViewItem) {
-    item.nameObservable.asDriver(onErrorJustReturn: nil).drive(nameLabel.rx.text).disposed(by: disposeBag)
-    item.locationObservable.asDriver(onErrorJustReturn: nil).drive(locationLabel.rx.text).disposed(by: disposeBag)
-    item.levelObservable.asDriver(onErrorJustReturn: nil).drive(levelLabel.rx.text).disposed(by: disposeBag)
-    item.avatarObservable.asDriver(onErrorJustReturn: nil).drive(onNext: { [weak self] (url) in
-      if let url = url {
-        let filter = AspectScaledToFillSizeWithRoundedCornersFilter(
-          size: self?.avatarImageView.frame.size ?? .zero,
-          radius: 10
-        )
-        self?.avatarImageView.af_setImage(
-          withURL: url,
-          placeholderImage: UIImage(named: "gamePlaceholderSmall"),
-          filter: filter,
-          imageTransition: .crossDissolve(0.2)
-        )
-      } else {
-        self?.avatarImageView.image = UIImage(named: "gamePlaceholderSmall")
-      }
-    }).disposed(by: disposeBag)
+    item.nameObservable
+      .asDriver(onErrorJustReturn: nil)
+      .drive(nameLabel.rx.text)
+      .disposed(by: disposeBag)
+    item.locationObservable.asDriver(onErrorJustReturn: nil)
+      .drive(locationLabel.rx.text)
+      .disposed(by: disposeBag)
+    item.levelObservable
+      .asDriver(onErrorJustReturn: nil)
+      .drive(levelLabel.rx.text)
+      .disposed(by: disposeBag)
+    item.avatarObservable
+      .asDriver(onErrorJustReturn: nil)
+      .drive(onNext: { [weak self] (url) in
+        if let url = url {
+          let filter = AspectScaledToFillSizeWithRoundedCornersFilter(
+            size: self?.avatarImageView.frame.size ?? .zero,
+            radius: 41
+          )
+          self?.avatarImageView.af_setImage(
+            withURL: url,
+            placeholderImage: UIImage(named: "gamePlaceholderSmall"),
+            filter: filter,
+            imageTransition: .crossDissolve(0.2)
+          )
+        } else {
+          self?.avatarImageView.image = UIImage(named: "gamePlaceholderSmall")
+        }
+      }).disposed(by: disposeBag)
   }
 
   // MARK: -
@@ -69,20 +81,26 @@ class UserInfoView: UIView {
     levelLabel = UILabel()
     levelLabel.text = ""
     levelLabel.textColor = .white
+    levelLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
     addSubview(levelLabel)
 
     nameLabel = UILabel()
     nameLabel.text = ""
     nameLabel.textColor = .white
+    nameLabel.font = UIFont.systemFont(ofSize: 40, weight: .bold)
+    nameLabel.adjustsFontSizeToFitWidth = true
     addSubview(nameLabel)
 
     avatarImageView = UIImageView()
-    avatarImageView.layer.cornerRadius = 10
+    avatarImageView.layer.cornerRadius = 41
     avatarImageView.backgroundColor = .clear
+    avatarImageView.clipsToBounds = true
+    avatarImageView.contentMode = .scaleAspectFill
     addSubview(avatarImageView)
 
     locationLabel = UILabel()
-    locationLabel.textColor = .white
+    locationLabel.textColor = UIColor(red: 0.29, green: 0.294, blue: 0.376, alpha: 1)
+    locationLabel.font = UIFont.systemFont(ofSize: 12.0)
     addSubview(locationLabel)
 
     avatarImageView.snp.makeConstraints { (maker) in
@@ -99,13 +117,13 @@ class UserInfoView: UIView {
     }
 
     nameLabel.snp.makeConstraints { (maker) in
-      maker.top.equalTo(levelLabel.snp.bottom)
+      maker.top.equalTo(levelLabel.snp.bottom).offset(3)
       maker.leading.equalTo(levelLabel.snp.leading)
-      maker.trailing.equalTo(avatarImageView).offset(-5)
+      maker.trailing.equalTo(avatarImageView.snp.leading).offset(-5)
     }
 
     locationLabel.snp.makeConstraints { (maker) in
-      maker.top.equalTo(nameLabel.snp.bottom)
+      maker.top.equalTo(nameLabel.snp.bottom).offset(3)
       maker.leading.equalTo(nameLabel)
     }
   }

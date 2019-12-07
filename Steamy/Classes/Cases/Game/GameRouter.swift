@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class GameRouter: BaseRouter {
+class GameRouter: BaseBuilder {
 
   static var patterns: [String] {
     return ["user"]

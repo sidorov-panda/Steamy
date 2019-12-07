@@ -21,8 +21,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //!!!!!REMOVE BEFORE BUILD!!!!
 //    Session.shared.userId = 76561197960434622
 
+    let dataCollector = RealmDataCollector()
     if let rootVC = UIApplication.shared.windows.first?.rootViewController as? RootViewController {
-      let rootViewModel = RootViewModel()
+      let rootDependencies = RootViewModelDependency(dataCollector: dataCollector)
+      let rootViewModel = RootViewModel(favoriteGameId: Session.shared.gameId,
+                                        dependencies: rootDependencies)
       rootVC.configure(with: rootViewModel)
     }
 
@@ -31,13 +34,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		return true
 	}
 
-  func loadCountries() {
-    
+  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+    //You can use deeplinks to manage test data. Please see README.md for instructions
+    if url.host == "setUser" {
+      if
+        let userIdString = url.pathComponents.last,
+        let userId = Int(userIdString) {
+        Session.shared.userId = userId
+      }
+    } else if url.host == "addStat" {
+      if let numberString = url.pathComponents.last, let number = Int(numberString) {
+        if let userId = Session.shared.userId {
+          let gameId = Session.shared.gameId
+          let collector = RealmDataCollector()
+          collector.addFakeData(userId: userId, gameId: gameId, count: number)
+        }
+      }
+    }
+    return true
   }
 
   func appearance() {
     window?.tintColor = .white
-    // Override point for customization after application launch.
     // Sets background to a blank/empty image
     UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
     // Sets shadow (line below the bar) to a blank image
@@ -57,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func collectData() {
     if let userId = Session.shared.userId {
       let gameId = Session.shared.gameId
-      let collector = AppManager()
+      let collector = RealmDataCollector()
       collector.collectData(userId: userId, gameId: gameId)
     }
   }

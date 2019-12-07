@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FriendsRouter: BaseRouter {
+class FriendsRouter: BaseBuilder {
 
   static var patterns: [String] {
     return ["friends"]
@@ -25,11 +25,11 @@ class FriendsRouter: BaseRouter {
 
   static func friendsViewController(with userId: Int) -> UIViewController? {
     var provider: UserManagerProviderProtocol
-    if userId == Session.shared.userId {
-      provider = UserManagerRealmProvider()
-    } else {
+//    if userId == Session.shared.userId {
+//      provider = UserManagerRealmProvider()
+//    } else {
       provider = UserManagerSteamAPIProvider()
-    }
+//    }
     provider.cacheEnabled = true
     let userManager = UserManager(provider: provider)
     guard

@@ -14,18 +14,13 @@ protocol DataCollector {
   func collectData(userId: Int, gameId: Int)
 }
 
-class AppManager: DataCollector {
+class RealmDataCollector: DataCollector {
+
+  private let keyDateFormatter = DateFormatter(withFormat: "yyyyMMdd", locale: "en_US")
 
   // MARK: -
 
-  enum TimeoutKeys: String {
-    case gameStats
-    case friends
-    case favoriteGame
-  }
-
-  // MARK: -
-
+  //Static keys, don't change!
   enum Stats: String, CaseIterable {
     case totalKills = "total_kills"
     case totalDeaths = "total_deaths"
@@ -42,6 +37,23 @@ class AppManager: DataCollector {
   }
 
   let realm = try! Realm()
+
+  func addFakeData(userId: Int, gameId: Int, count: Int) {
+
+    for day in 0..<count {
+      let date = Date(timeIntervalSinceNow: TimeInterval(-60*60*24*day))
+      [Stats.totalKills, Stats.totalDeaths].forEach { (stat) in
+        let gameStat = GameStat()
+        gameStat.name = stat.rawValue
+        gameStat.displayName = stat.displayName()
+        self.updateOrCreate(date: date,
+                            userId: userId,
+                            key: stat.rawValue,
+                            value: String(Int.random(in: 0..<1000)),
+                            displayName: stat.displayName())
+      }
+    }
+  }
 
   func collectData(userId: Int, gameId: Int) {
 
@@ -86,10 +98,8 @@ class AppManager: DataCollector {
     }
   }
 
-  let keyDateFormatter = DateFormatter(withFormat: "yyyyMMdd", locale: "en_US")
-
-  func updateOrCreate(userId: Int, key: String, value: String, displayName: String?) {
-    let date = keyDateFormatter.string(from: Date())
+  func updateOrCreate(date: Date = Date(), userId: Int, key: String, value: String, displayName: String?) {
+    let date = keyDateFormatter.string(from: date)
     let todayKey = "\(date)_\(key)"
     try! realm.write {
       self.realm.create(GameStatDB.self, value: ["user": String(userId),

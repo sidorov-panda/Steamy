@@ -22,8 +22,23 @@ extension NSAttributedString {
   }
 }
 
-extension String{
-  var htmlStripped: String{
-    return self.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+extension String {
+  var replacingHTMLEntities: String? {
+    do {
+      return try NSAttributedString(data: Data(utf8), options: [
+          .documentType: NSAttributedString.DocumentType.html,
+          .characterEncoding: String.Encoding.utf8.rawValue
+      ], documentAttributes: nil).string
+    } catch {
+      return nil
+    }
+  }
+
+  var htmlStripped: String {
+    let str = self
+      .replacingHTMLEntities?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+      .replacingHTMLEntities?.replacingOccurrences(of: "\\[img\\](.*?)\\[\\/img\\]", with: "", options: .regularExpression, range: nil)
+      .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    return str
   }
 }

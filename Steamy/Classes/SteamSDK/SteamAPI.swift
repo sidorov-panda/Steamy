@@ -42,6 +42,7 @@ class SteamAPI {
     case gameSchema(gameId: Int)
     case achievements(userId: Int, gameId: Int)
     case badges(userId: Int)
+    case news(gameId: Int)
 
     func url() -> URL? {
       var components: URLComponents?
@@ -99,6 +100,9 @@ class SteamAPI {
       case .badges(_):
         path += "IPlayerService/GetBadges"
         break
+      case .news(_):
+        path += "ISteamNews/GetNewsForApp"
+        break
       }
       path.append("/\(self.APIVersion())/")
       return path
@@ -106,7 +110,7 @@ class SteamAPI {
 
     private func APIVersion() -> String {
       switch self {
-      case .user(_), .users(_), .gameStats(_, _):
+      case .user(_), .users(_), .gameStats(_, _), .news(_):
         return "v0002"
       case .gameSchema(_):
         return "v2"
@@ -163,6 +167,9 @@ class SteamAPI {
 
       case .badges(let userId):
         ret.append(URLQueryItem(name: "steamid", value: String(userId)))
+        
+      case .news(let gameId):
+        ret.append(URLQueryItem(name: "appid", value: String(gameId)))
       }
       return ret
     }

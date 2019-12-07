@@ -60,7 +60,7 @@ class ShowcaseCell: BaseCell {
       maker.leading.equalToSuperview()
       maker.trailing.equalToSuperview()
       maker.bottom.equalToSuperview().priority(.medium)
-      maker.top.equalToSuperview()
+      maker.top.equalToSuperview().offset(16)
     }
 
     var lastView: UIView?

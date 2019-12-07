@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProfileRouter: BaseRouter {
+class ProfileRouter: BaseBuilder {
 
   static var patterns: [String] = []
 
@@ -29,7 +29,7 @@ class ProfileRouter: BaseRouter {
       let userViewModel = ProfileViewModel(userId: userId,
                                            favoriteGameid: Session.shared.gameId,
                                            shouldShowFavoriteGame: Session.shared.userId == userId,
-                                           dependencies: ProfileViewModelDependency(userManager: userManager, statisticCollector: AppManager())) else {
+                                           dependencies: ProfileViewModelDependency(userManager: userManager, statisticCollector: RealmDataCollector())) else {
         return nil
     }
     let userVC = ProfileViewController()

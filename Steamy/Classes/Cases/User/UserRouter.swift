@@ -8,7 +8,7 @@
 
 import UIKit
 
-class UserRouter: BaseRouter {
+class UserRouter: BaseBuilder {
 
   static var patterns: [String] {
     return ["user"]

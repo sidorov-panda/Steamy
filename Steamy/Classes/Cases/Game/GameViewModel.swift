@@ -36,6 +36,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     var isLoading: Observable<Bool>
     var sections: Observable<[BaseTableSectionItem]>
     var images: Observable<[InputSource]>
+    var openURL: Observable<URL?>
   }
 
   var input: GameViewModel.Input!
@@ -50,14 +51,17 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   private var imagesSubject = PublishSubject<[InputSource]>()
   private var sectionsRelay = BehaviorRelay<[BaseTableSectionItem]>(value: [])
   private var didTapCellSubject = PublishSubject<IndexPath>()
+  private var openURLSubject = PublishSubject<URL?>()
 
   // MARK: -
 
   var achievementsOnPage = 3
   var statsOnPage = 3
+  var articlesOnPage = 3
 
   var shouldShowAllAchievements = false
   var shouldShowAllStats = false
+  var shouldShowAllNews = false
 
   var dependencies: GameViewModelDependency
   var gameId: Int
@@ -67,6 +71,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
   var achievments: [GameAchievement] = []
   var userStats: [GameStat] = []
+  var articles: [Article] = []
 
   init?(userId: Int, gameId: Int, isFavoriteGame: Bool = false, dependencies: GameViewModelDependency) {
     self.userId = userId
@@ -82,12 +87,20 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
                          title: titleSubject.asObservable(),
                          isLoading: isLoadingSubject.asObservable(),
                          sections: sectionsRelay.asObservable(),
-                         images: imagesSubject.asObservable())
+                         images: imagesSubject.asObservable(),
+                         openURL: openURLSubject.asObservable())
 
+    bind()
+  }
+
+  // MARK: -
+
+  func bind() {
     viewDidLoadSubject.subscribe(onNext: { [weak self] (_) in
       self?.isLoadingSubject.onNext(true)
       self?.getGameInfo()
       self?.getAchievements()
+      self?.getNews()
     }).disposed(by: disposeBag)
 
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
@@ -106,7 +119,36 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
         self?.shouldShowAllStats = !(self?.shouldShowAllStats ?? false)
         self?.createSections()
       }
+      if
+        section.identifier == "TitleCellArticle_ShowAll" ||
+        section.identifier == "TitleCellArticle_HideAll" {
+        self?.shouldShowAllNews = !(self?.shouldShowAllNews ?? false)
+        self?.createSections()
+      }
+
+      if section.identifier.starts(with: "ArticleCell") {
+        guard let articleId = section.identifier.split(separator: "_").last else {
+          return
+        }
+        let hasURL = self?.articles.filter({ (article) -> Bool in
+          return article.id == String(articleId)
+        }).first
+        if let url = hasURL?.url {
+          self?.openURLSubject.onNext(url)
+        }
+      }
     }).disposed(by: disposeBag)
+  }
+
+  func getNews() {
+    self.dependencies.gameManager.news(gameId: gameId) { [weak self] (articles, error) in
+      self?.articles = (articles ?? []).map({ (article) -> Article in
+        let newArticle = article
+        newArticle.contents = article.contents?.htmlStripped
+        return newArticle
+      })
+      self?.createSections()
+    }
   }
 
   func getAchievements() {
@@ -147,6 +189,11 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
           return newStat
         }
         return stat
+      }).filter({ (stat) -> Bool in
+        return stat.displayName != nil
+          && stat.displayName != ""
+          && stat.name != nil
+          && stat.name != ""
       })
     }, afterNext: { [weak self] (res) in
       self?.createSections()
@@ -186,14 +233,15 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
   // MARK: -
 
+  //TODO: разнести создание секций по разным методам
   func createSections() {
     var sctns = [BaseTableSectionItem]()
-    var cells = [BaseCellItem]()
 
-    if isFavoriteGame {
+    let charts = chartData()
+    if isFavoriteGame && charts.keys.count > 0 {
       let chartCell = ChartCellItem(reuseIdentifier: "ChartCell",
                                     identifier: "ChartCell")
-      chartCell.data = chartData()
+      chartCell.data = charts
 
       var chartSection = BaseTableSectionItem(header: " ", items: [chartCell])
       chartSection.identifier = "ChartSection"
@@ -229,14 +277,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     // Building Achievement Section
     if achievments.count > 0 {
       var achievementsCells = [BaseCellItem]()
-      let achCells = (achievments[safe: 0..<(shouldShowAllAchievements ? achievments.count : achievementsOnPage)] ?? [])
-        .map { (achie) -> BaseCellItem in
-          let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                      identifier: "TitleCellAchievements_\(achie.name ?? String.random())")
-          achCell.title = achie.displayName ?? achie.name
-          return achCell
-      }
-      achievementsCells.append(contentsOf: achCells)
+      achievementsCells.append(contentsOf: achievementCells())
 
       if achievments.count > achievementsOnPage {
         if shouldShowAllAchievements {
@@ -262,17 +303,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     // Building Stats Section
     if userStats.count > 0 {
       var userStatsCells = [BaseCellItem]()
-      let statCells = (userStats[safe: 0..<(shouldShowAllStats ? userStats.count : statsOnPage)] ?? [])
-        .map { (stat) -> BaseCellItem in
-          let statCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                       identifier: "TitleCellStats_\(stat.name ?? "")")
-          let leftPart = stat.displayName ?? stat.name ?? ""
-          let rightPart: String = stat.value != nil ? String(stat.value ?? 0) : ""
-
-          statCell.title = "\(leftPart): \(rightPart)"
-          return statCell
-      }
-      userStatsCells.append(contentsOf: statCells)
+      userStatsCells.append(contentsOf: statCells())
 
       if userStats.count > statsOnPage {
         if shouldShowAllStats {
@@ -295,34 +326,111 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       }
     }
 
+    var cells = [BaseCellItem]()
     // Building Game Info Section
-    if self.game != nil {
-      let priceCell = TextCellItem(reuseIdentifier: "TextCell",
-                                   identifier: "GameInfoCell_Price")
-      priceCell.text = (self.game?.isFree ?? false) ? "Free" : self.game?.price?.htmlStripped
-      cells.append(priceCell)
-
-      let aboutCell = TextCellItem(reuseIdentifier: "TextCell",
-                                       identifier: "GameInfoCell_About")
-      aboutCell.text = self.game?.aboutDesc?.htmlStripped
-      cells.append(aboutCell)
-
-      let descCell = TextCellItem(reuseIdentifier: "TextCell",
-                                      identifier: "GameInfoCell_Desc")
-      descCell.text = self.game?.detailedDesc?.htmlStripped
-      cells.append(descCell)
-
+    if let game = self.game {
+      cells.append(priceCellItem(game: game))
+      cells.append(aboutCellItem(game: game))
+      cells.append(descCellItem(game: game))
       var section = BaseTableSectionItem(header: " ", items: cells)
       section.identifier = "BaseTableSection_1"
       sctns.append(section)
     }
+
+    if articles.count > 0 {
+      sctns.append(newsSection())
+    }
+
     sectionsRelay.accept(sctns)
+  }
+
+  // MARK: - CellItems
+
+  func newsSection() -> BaseTableSectionItem {
+    var section = BaseTableSectionItem(header: "NEWS", items: articlesCellItems())
+    section.identifier = "NewsSection"
+    return section
+  }
+
+  private let articleDateFormatter = DateFormatter(withFormat: "MMM dd yyyy", locale: NSLocale.current.identifier)
+  func articlesCellItems() -> [BaseCellItem] {
+    var cells = (articles[safe: 0..<(shouldShowAllNews ? articles.count : articlesOnPage)] ?? [])
+      .map { (article) -> BaseCellItem in
+        let cell = ArticleCellItem(reuseIdentifier: "ArticleCell",
+                                   identifier: "ArticleCell_\(article.id ?? String.random())")
+        cell.author = article.author
+        cell.content = article.contents
+        cell.title = article.title
+        cell.date = self.articleDateFormatter.string(from: article.date ?? Date())
+        return cell
+    }
+
+    if articles.count > articlesOnPage {
+      if shouldShowAllNews {
+        let articlesCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                         identifier: "TitleCellArticle_HideAll")
+        articlesCell.title = "Hide News"
+        cells.append(articlesCell)
+      } else {
+        let articlesCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                         identifier: "TitleCellArticle_ShowAll")
+        articlesCell.title = "See All News"
+        cells.append(articlesCell)
+      }
+    }
+    return cells
+  }
+
+  func statCells() -> [BaseCellItem] {
+    return (userStats[safe: 0..<(shouldShowAllStats ? userStats.count : statsOnPage)] ?? [])
+      .map { (stat) -> BaseCellItem in
+        let statCell = KeyValueCellItem(reuseIdentifier: "KeyValueCell",
+                                        identifier: "KeyValueCell_\(stat.name ?? "")")
+        let leftPart = stat.displayName ?? stat.name ?? ""
+        let rightPart: String = stat.value != nil ? String(stat.value ?? 0) : ""
+        statCell.key = leftPart
+        statCell.value = rightPart
+        return statCell
+    }
+  }
+
+  func achievementCells() -> [BaseCellItem] {
+    return (achievments[safe: 0..<(shouldShowAllAchievements ? achievments.count : achievementsOnPage)] ?? [])
+      .map { (achie) -> BaseCellItem in
+        let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
+                                    identifier: "TitleCellAchievements_\(achie.name ?? String.random())")
+        achCell.title = achie.displayName ?? achie.name
+        return achCell
+    }
+  }
+
+  func priceCellItem(game: Game) -> BaseCellItem {
+    let priceCell = TextCellItem(reuseIdentifier: "TextCell",
+                                 identifier: "GameInfoCell_Price")
+    priceCell.text = game.isFree ? "Free" : game.price?.htmlStripped
+    return priceCell
+  }
+
+  func aboutCellItem(game: Game) -> BaseCellItem {
+    let aboutCell = TextCellItem(reuseIdentifier: "TextCell",
+                                     identifier: "GameInfoCell_About")
+    aboutCell.text = game.aboutDesc?.htmlStripped
+    return aboutCell
+  }
+
+  func descCellItem(game: Game) -> BaseCellItem {
+    let descCell = TextCellItem(reuseIdentifier: "TextCell",
+                                    identifier: "GameInfoCell_Desc")
+    descCell.text = game.detailedDesc?.htmlStripped
+    return descCell
   }
 
   // MARK: -
 
-  func chartData() -> [Date: [String: (String, UIColor, Int)]] {
-    var preparedData: [Date: [String: (String, UIColor, Int)]] = [:]
+  typealias ChartData = [Date: [String: (String, UIColor, Int)]]
+
+  func chartData() -> ChartData {
+    var preparedData: ChartData = [:]
     for (date, value) in self.dependencies.statisticProvider?.statistics(for: userId) ?? [:] {
       for (color, (name, vv)) in zip([UIColor.red, UIColor.blue], value) {
         if preparedData[date] == nil {
