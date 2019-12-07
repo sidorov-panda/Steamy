@@ -43,6 +43,7 @@ class GameCell: BaseCell {
     self.textLabel?.text = item.name
     self.textLabel?.textColor = .white
     if let imageURL = item.iconURL {
+      self.imageView?.layer.cornerRadius = 3
       self.imageView?.af_setImage(withURL: imageURL,
                                   placeholderImage: item.placeholderImage,
                                   filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))

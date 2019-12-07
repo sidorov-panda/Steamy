@@ -10,16 +10,34 @@ import Foundation
 import ObjectMapper
 
 class User: Mappable {
+  
+  enum PersonaState: Int {
+    case offline = 0
+    case online
+    case busy
+    case away
+    case snooze
+    case lookingToTrade
+    case lookingToPlay
+  }
+  
+  enum VisibilityState: Int {
+    case notVisible = 1
+    case `public` = 3
+  }
 
   // MARK: -
 
-  dynamic var steamid: Int?
-  dynamic var avatarURL: URL?
-  dynamic var name: String?
-  dynamic var nickname: String?
-  dynamic var countryCode: String?
-  dynamic var stateCode: String?
-  dynamic var cityCode: Int?
+  var steamid: Int?
+  var avatarURL: URL?
+  var name: String?
+  var nickname: String?
+  var countryCode: String?
+  var stateCode: String?
+  var cityCode: Int?
+  var personastate: PersonaState = .offline
+  var visibilityState: VisibilityState = .notVisible
+  var lastLogoff: Date?
 
   // MARK: - Mappable
 
@@ -35,6 +53,9 @@ class User: Mappable {
     countryCode <- map["loccountrycode"]
     stateCode <- map["locstatecode"]
     cityCode <- map["loccityid"]
+    personastate <- map["personastate"]
+    visibilityState <- map["communityvisibilitystate"]
+    lastLogoff <- (map["lastlogoff"], DateTransform())
   }
 
 }

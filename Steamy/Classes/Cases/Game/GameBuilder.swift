@@ -23,10 +23,10 @@ class GameBuilder: BaseBuilder {
       let gameId = Int(idParam) else {
         return nil
     }
-    return GameBuilder.gameViewController(with: userId, gameId: gameId)
+    return GameBuilder.gameViewController(with: userId, gameId: gameId, timePlayed: nil)
   }
 
-  static func gameViewController(with userId: Int, gameId: Int) -> UIViewController? {
+  static func gameViewController(with userId: Int, gameId: Int, timePlayed: Int? = nil) -> UIViewController? {
     let userSteamAPI = UserManagerSteamAPIProvider()
     let gameSteamAPI = GameManagerSteamAPIProvider()
     let userManager = UserManager(provider: userSteamAPI)
@@ -37,6 +37,7 @@ class GameBuilder: BaseBuilder {
       let userViewModel = GameViewModel(
         userId: userId,
         gameId: gameId,
+        timePlayed: timePlayed,
         isFavoriteGame: gameId == Session.shared.gameId,
         dependencies: GameViewModelDependency(userManager: userManager,
                                               gameManager: gameManager,

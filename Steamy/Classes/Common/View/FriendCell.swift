@@ -42,6 +42,8 @@ class FriendCell: BaseCell {
     self.textLabel?.text = item.name
     self.textLabel?.textColor = .white
     if let imageURL = item.avatarURL {
+      self.imageView?.layer.cornerRadius = 15.0
+      self.imageView?.clipsToBounds = true
       self.imageView?.af_setImage(withURL: imageURL,
                                   placeholderImage: item.placeholderImage,
                                   filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))

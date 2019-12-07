@@ -84,7 +84,8 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
           }
           self?.locationSubject.onNext(location)
         }
-        self?.nameSubject.onNext(user.nickname)
+        let name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
+        self?.nameSubject.onNext(name)
         self?.avatarSubject.onNext(user.avatarURL)
       }
     }

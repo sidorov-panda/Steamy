@@ -26,7 +26,8 @@ class GameListViewController: BaseViewController, ControllerProtocol {
 
   // MARK: -
 
-  var tableView = UITableView()
+  let tableView = UITableView()
+  let searchBar = UISearchBar()
 
   // MARK: -
 
@@ -70,6 +71,8 @@ class GameListViewController: BaseViewController, ControllerProtocol {
   }
 
   func configureUI() {
+    tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 0, right: 0)
+
     view.backgroundColor = .defaultBackgroundColor
     tableView.backgroundColor = .defaultBackgroundCellColor
     tableView.separatorStyle = .none
@@ -81,6 +84,15 @@ class GameListViewController: BaseViewController, ControllerProtocol {
       maker.right.equalTo(self.view)
       maker.bottom.equalTo(self.view)
     })
+    searchBar.searchBarStyle = UISearchBar.Style.prominent
+    searchBar.placeholder = "Search game"
+    searchBar.sizeToFit()
+    searchBar.isTranslucent = true
+    searchBar.backgroundImage = UIImage()
+    searchBar.backgroundColor = .defaultBackgroundCellColor
+    searchBar.tintColor = .white
+    searchBar.searchTextField.textColor = .white
+    navigationItem.titleView = searchBar
   }
 
   func registerCells() {
@@ -110,8 +122,14 @@ class GameListViewController: BaseViewController, ControllerProtocol {
       .asDriver()
       .drive(viewModel.input.didTapCell)
       .disposed(by: disposeBag)
-  }
 
+    searchBar
+      .rx
+      .text
+      .asDriver()
+      .drive(viewModel.input.searchTerm)
+      .disposed(by: disposeBag)
+  }
 }
 
 extension GameListViewController: IndicatorInfoProvider {

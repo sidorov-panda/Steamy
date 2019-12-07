@@ -21,7 +21,7 @@ struct UserInfoViewItem {
 class UserInfoView: UIView {
 
   let disposeBag = DisposeBag()
-  
+
   // MARK: -
 
   var nameLabel: UILabel!
@@ -48,13 +48,16 @@ class UserInfoView: UIView {
       .asDriver(onErrorJustReturn: nil)
       .drive(nameLabel.rx.text)
       .disposed(by: disposeBag)
+
     item.locationObservable.asDriver(onErrorJustReturn: nil)
       .drive(locationLabel.rx.text)
       .disposed(by: disposeBag)
+
     item.levelObservable
       .asDriver(onErrorJustReturn: nil)
       .drive(levelLabel.rx.text)
       .disposed(by: disposeBag)
+
     item.avatarObservable
       .asDriver(onErrorJustReturn: nil)
       .drive(onNext: { [weak self] (url) in
@@ -114,6 +117,7 @@ class UserInfoView: UIView {
       maker.top.equalTo(self).offset(0)
       maker.left.equalTo(self).offset(16)
       maker.trailing.equalTo(avatarImageView).offset(-5)
+      maker.height.greaterThanOrEqualTo(15)
     }
 
     nameLabel.snp.makeConstraints { (maker) in

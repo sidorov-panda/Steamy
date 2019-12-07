@@ -25,6 +25,7 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
 
   struct Input {
     var didTapCell: AnyObserver<IndexPath>
+    var searchTerm: AnyObserver<String?>
   }
 
   struct Output {
@@ -44,7 +45,8 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
     self.userId = userId
     self.dependencies = dependencies
 
-    input = Input(didTapCell: didTapCellSubject.asObserver())
+    input = Input(didTapCell: didTapCellSubject.asObserver(),
+                  searchTerm: searchTermSubject.asObserver())
     output = Output(sections: sectionsRelay.asObservable(),
                     showController: showControllerSubject.asObservable())
 
@@ -63,6 +65,7 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
   private var sectionsRelay = BehaviorRelay<[BaseTableSectionItem]>(value: [])
   private var didTapCellSubject = PublishSubject<IndexPath>()
   private var showControllerSubject = PublishSubject<UIViewController>()
+  private var searchTermSubject = BehaviorSubject<String?>(value: nil)
 
   // MARK: -
 
@@ -70,6 +73,11 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
       self?.didTap(on: indexPath)
     }).disposed(by: disposeBag)
+
+    searchTermSubject.asObserver().subscribe(onNext: { [weak self] (term) in
+      self?.createSections()
+    }).disposed(by: disposeBag)
+
   }
 
   func didTap(on indexPath: IndexPath) {
@@ -80,7 +88,10 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
       //show
       guard
         let gameId = Int(section.identifier.split(separator: "_").last ?? ""),
-        let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId) else {
+        let game = games.filter({ (game) -> Bool in
+          return game.id == gameId
+          }).first,
+        let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId, timePlayed: game.playtime) else {
         return
       }
       self.showControllerSubject.onNext(userViewController)
@@ -92,7 +103,12 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
   var games: [UserGame] = []
 
   func createSections() {
-    var gameCells: [BaseCellItem] = self.games.sorted(by: { (game1, game2) -> Bool in
+    var gameCells: [BaseCellItem] = self.games.filter({ (game) -> Bool in
+      if let term = try! self.searchTermSubject.value()?.lowercased(), term.count > 0 {
+        return (game.name ?? "").lowercased().contains(term)
+      }
+      return true
+    }).sorted(by: { (game1, game2) -> Bool in
       return (game1.playtime ?? 0) > (game2.playtime ?? 0)
     }).map { (game) -> GameCellItem in
       let gameCellItem = GameCellItem(reuseIdentifier: "GameCell",
@@ -105,7 +121,7 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
     if gameCells.count == 0 {
       let noGamesCell = TitleCellItem(reuseIdentifier: "TitleCell",
                                       identifier: CellIdentifiers.noGames.rawValue)
-      noGamesCell.title = "No games yet"
+      noGamesCell.title = "No games found"
       gameCells.append(noGamesCell)
     }
     var section = BaseTableSectionItem(header: "Games", items: gameCells)

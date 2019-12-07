@@ -68,14 +68,16 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   var userId: Int
   var game: Game?
   var isFavoriteGame: Bool
+  var timePlayed: Int?
 
   var achievments: [GameAchievement] = []
   var userStats: [GameStat] = []
   var articles: [Article] = []
 
-  init?(userId: Int, gameId: Int, isFavoriteGame: Bool = false, dependencies: GameViewModelDependency) {
+  init?(userId: Int, gameId: Int, timePlayed: Int? = nil, isFavoriteGame: Bool = false, dependencies: GameViewModelDependency) {
     self.userId = userId
     self.gameId = gameId
+    self.timePlayed = timePlayed
     self.isFavoriteGame = isFavoriteGame
     self.dependencies = dependencies
 
@@ -248,20 +250,29 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       sctns.append(chartSection)
     }
 
-    if achievments.count > 0 || userStats.count > 0 {
+    if achievments.count > 0 || timePlayed != nil {
       let gameStatCell = TwoTileCellItem(reuseIdentifier: "TwoTileCell",
-                                         identifier: "TwoTileCell")
+                                         identifier: "TwoTileCell_\(achievments.count)_\(timePlayed ?? 0)")
       if achievments.count > 0 {
         gameStatCell.firstTileKey = "Achievements"
         gameStatCell.firstTileValue = "\(achievments.count)"
       }
 
-      if userStats.count > 0 && achievments.count > 0 {
-        gameStatCell.secondTileKey = "Stats"
-        gameStatCell.secondTileValue = "\(userStats.count)"
+      let playedTimeComponents = ((timePlayed ?? 0) * 60).secondsToHoursMinutesSeconds()
+      var timePlayedStr = ""
+      if (playedTimeComponents.0) > 0 {
+        timePlayedStr += "\(playedTimeComponents.0) h"
+      } else
+        //showing mins only if there's no hours
+      if (playedTimeComponents.1) > 0 {
+        timePlayedStr += "\(playedTimeComponents.1) min"
+      }
+      if timePlayedStr != "" && achievments.count > 0 {
+        gameStatCell.secondTileKey = "Time Played"
+        gameStatCell.secondTileValue = timePlayedStr
       } else if achievments.count == 0 {
-        gameStatCell.firstTileKey = "Stats"
-        gameStatCell.firstTileValue = "\(userStats.count)"
+        gameStatCell.firstTileKey = "Time Played"
+        gameStatCell.firstTileValue = timePlayedStr
       }
 
       var achievementsCells = [BaseCellItem]()

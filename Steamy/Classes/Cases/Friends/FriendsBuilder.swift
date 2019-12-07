@@ -29,8 +29,9 @@ class FriendsBuilder: BaseBuilder {
 //      provider = UserManagerRealmProvider()
 //    } else {
       provider = UserManagerSteamAPIProvider()
+    //Turning off the cache to get latest Online info
+    provider.cacheEnabled = false
 //    }
-    provider.cacheEnabled = true
     let userManager = UserManager(provider: provider)
     guard
       let friendsViewModel = FriendsViewModel(userId: userId,

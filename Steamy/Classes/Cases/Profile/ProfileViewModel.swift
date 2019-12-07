@@ -196,11 +196,15 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
     if section.identifier.starts(with: CellReuseIdentifiers.activity.rawValue) || section.identifier.starts(with: CellReuseIdentifiers.favoriteGame.rawValue) {
       //show
       guard
-        let gameId = Int(section.identifier.split(separator: "_").last ?? ""),
-        let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId) else {
+        let gameId = Int(section.identifier.split(separator: "_").last ?? "") else {
         return
       }
-      showControllerSubject.onNext(userViewController)
+      let game = games.filter({ (game) -> Bool in
+        return game.id == gameId
+      }).first
+      if let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId, timePlayed: game?.playtime) {
+        showControllerSubject.onNext(userViewController)
+      }
     } else if section.identifier == CellIdentifiers.titleCellSeeAll.rawValue {
       //show
       guard

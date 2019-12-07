@@ -76,22 +76,55 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   func createSections() {
     var sctns = [BaseTableSectionItem]()
 
-    var friendCells: [BaseCellItem] = self.users.map { (user) -> FriendCellItem in
+    let onlineFriendCells: [BaseCellItem] = users.sorted(by: { (user1, user2) -> Bool in
+      return (user1.nickname ?? user1.name ?? "") > (user2.nickname ?? user2.name ?? "")
+    }).filter({ (user) -> Bool in
+      return
+      (user.personastate == .online
+        || user.personastate == .lookingToPlay
+        || user.personastate == .busy
+        || user.personastate == .away
+        || user.personastate == .lookingToTrade
+        || user.personastate == .snooze)
+    }).map { (user) -> FriendCellItem in
       let friendCellItem = FriendCellItem(reuseIdentifier: "FriendCell",
                                           identifier: "FriendCell_\(user.steamid ?? 0)")
-      friendCellItem.name = user.nickname
+      friendCellItem.name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
       friendCellItem.avatarURL = user.avatarURL
       return friendCellItem
     }
-    if friendCells.count == 0 {
+
+    let offlineFriendCells: [BaseCellItem] = users.filter({ (user) -> Bool in
+      return user.personastate == .offline
+    }).sorted(by: { (user1, user2) -> Bool in
+      return (user1.nickname ?? user1.name ?? "") > (user2.nickname ?? user2.name ?? "")
+    }).map { (user) -> FriendCellItem in
+      let friendCellItem = FriendCellItem(reuseIdentifier: "FriendCell",
+                                          identifier: "FriendCell_\(user.steamid ?? 0)")
+      friendCellItem.name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
+      friendCellItem.avatarURL = user.avatarURL
+      return friendCellItem
+    }
+
+    if onlineFriendCells.count == 0 && offlineFriendCells.count == 0 {
       let noFriendsCell = TitleCellItem(reuseIdentifier: "TitleCell",
                                         identifier: "TitleCell_NoFriends")
       noFriendsCell.title = "No friends yet"
-      friendCells.append(noFriendsCell)
+      var section = BaseTableSectionItem(header: "Friends", items: [noFriendsCell])
+      section.identifier = "FriendsSection"
+      sctns.append(section)
     }
-    var section = BaseTableSectionItem(header: "Friends", items: friendCells)
-    section.identifier = "FriendsSection"
-    sctns.append(section)
+    if onlineFriendCells.count > 0 {
+      var section = BaseTableSectionItem(header: "Online", items: onlineFriendCells)
+      section.identifier = "FriendsSectionOnline"
+      sctns.append(section)
+    }
+    
+    if offlineFriendCells.count > 0 {
+      var section = BaseTableSectionItem(header: "Offline", items: offlineFriendCells)
+      section.identifier = "FriendsSectionOffline"
+      sctns.append(section)
+    }
     sectionsRelay.accept(sctns)
   }
 
@@ -117,7 +150,7 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   var isLoading = false
 
   func loadFriends() {
-    guard isLoading || self.users.count == 0 else { return }
+    guard !isLoading else { return }
     isLoading = true
     self.dependency.userManager.friends(userId: userId) { [weak self] (users, error) in
       self?.users = users ?? []

@@ -48,6 +48,7 @@ class ActivityCell: BaseCell {
     self.detailTextLabel?.textColor = UIColor(red: 0.57, green: 0.57, blue: 0.62, alpha: 1.0)
     self.detailTextLabel?.numberOfLines = 0
     if let imageURL = item.gameIconURL {
+      self.imageView?.layer.cornerRadius = 3
       self.imageView?.af_setImage(withURL: imageURL,
                                   filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))
     }
