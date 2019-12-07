@@ -21,6 +21,8 @@ class Article: Mappable {
   var feedlabel: String?
   var date: Date?
 
+  // MARK: - Mappable
+
   required init?(map: Map) {
     
   }

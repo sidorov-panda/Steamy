@@ -30,8 +30,8 @@ class GameBuilder: BaseBuilder {
     let userSteamAPI = UserManagerSteamAPIProvider()
     let gameSteamAPI = GameManagerSteamAPIProvider()
     let userManager = UserManager(provider: userSteamAPI)
-    let gameManager = GameManager(provider: gameSteamAPI)
     userSteamAPI.cacheEnabled = true
+    let gameManager = GameManager(provider: gameSteamAPI)
     gameSteamAPI.cacheEnabled = true
     guard
       let userViewModel = GameViewModel(

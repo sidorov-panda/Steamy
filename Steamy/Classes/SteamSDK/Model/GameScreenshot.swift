@@ -16,6 +16,8 @@ class GameScreenshot: Mappable {
   var id: Int?
   var thumbnailURL: URL?
   var fullURL: URL?
+  
+  // MARK: - Mappable
 
   required init?(map: Map) {
     
