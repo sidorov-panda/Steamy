@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ActivityRouter: BaseBuilder {
+class ActivityBuilder: BaseBuilder {
 
   static var patterns: [String] = []
 

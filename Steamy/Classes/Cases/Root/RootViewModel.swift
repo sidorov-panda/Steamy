@@ -69,7 +69,7 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
         if let favoriteGameId = self?.favoriteGameId {
           self?.dependencies.dataCollector.collectData(userId: userId, gameId: favoriteGameId)
         }
-        if let userViewController = UserRouter.userViewController(with: userId) {
+        if let userViewController = UserBuilder.userViewController(with: userId) {
           self?.showProfileSubject.onNext(UINavigationController(rootViewController: userViewController))
         }
       }).disposed(by: disposeBag)
@@ -79,7 +79,7 @@ class RootViewModel: BaseViewModel, ViewModelProtocol {
       .subscribe(onNext: { [weak self] (_) in
         if
           let userId = Session.shared.userId,
-          let userViewController = UserRouter.userViewController(with: userId) {
+          let userViewController = UserBuilder.userViewController(with: userId) {
           self?.showProfileSubject.onNext(UINavigationController(rootViewController: userViewController))
         } else {
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

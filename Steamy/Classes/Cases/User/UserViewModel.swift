@@ -46,9 +46,9 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
 
   func userViewControllers() -> [UIViewController] {
     guard
-      let profileVC = ProfileRouter.profileViewController(with: userId),
-      let friendsVC = FriendsRouter.friendsViewController(with: userId),
-      let activityVC = ActivityRouter.activityViewController(with: userId)
+      let profileVC = ProfileBuilder.profileViewController(with: userId),
+      let friendsVC = FriendsBuilder.friendsViewController(with: userId),
+      let activityVC = ActivityBuilder.activityViewController(with: userId)
     else {
       return []
     }

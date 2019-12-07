@@ -197,14 +197,14 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       //show
       guard
         let gameId = Int(section.identifier.split(separator: "_").last ?? ""),
-        let userViewController = GameRouter.gameViewController(with: userId, gameId: gameId) else {
+        let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId) else {
         return
       }
       showControllerSubject.onNext(userViewController)
     } else if section.identifier == CellIdentifiers.titleCellSeeAll.rawValue {
       //show
       guard
-        let userViewController = GameListRouter.gameListViewController(with: userId) else {
+        let userViewController = GameListBuilder.gameListViewController(with: userId) else {
         return
       }
       showControllerSubject.onNext(userViewController)

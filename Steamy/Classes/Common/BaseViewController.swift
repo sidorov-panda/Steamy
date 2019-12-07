@@ -33,7 +33,7 @@ class BaseViewController: UIViewController {
   override var preferredStatusBarStyle: UIStatusBarStyle {
     return .lightContent
   }
-  
+
   // MARK: -
 
   var disposeBag = DisposeBag()

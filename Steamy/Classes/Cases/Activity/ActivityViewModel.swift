@@ -64,7 +64,7 @@ class ActivityViewModel: BaseViewModel, ViewModelProtocol {
         //show
         guard
           let gameId = Int(section.identifier.split(separator: "_").last ?? ""),
-          let userViewController = GameRouter.gameViewController(with: userId, gameId: gameId) else {
+          let userViewController = GameBuilder.gameViewController(with: userId, gameId: gameId) else {
           return
         }
         self.showControllerSubject.onNext(userViewController)

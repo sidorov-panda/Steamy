@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FriendsRouter: BaseBuilder {
+class FriendsBuilder: BaseBuilder {
 
   static var patterns: [String] {
     return ["friends"]
@@ -20,7 +20,7 @@ class FriendsRouter: BaseBuilder {
       let userId = Int(idParam) else {
         return nil
     }
-    return FriendsRouter.friendsViewController(with: userId)
+    return FriendsBuilder.friendsViewController(with: userId)
   }
 
   static func friendsViewController(with userId: Int) -> UIViewController? {

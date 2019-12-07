@@ -8,7 +8,7 @@
 
 import UIKit
 
-class GameListRouter: BaseBuilder {
+class GameListBuilder: BaseBuilder {
 
   static var patterns: [String] = []
 
@@ -18,7 +18,7 @@ class GameListRouter: BaseBuilder {
       let userId = Int(idParam) else {
         return nil
     }
-    return GameListRouter.gameListViewController(with: userId)
+    return GameListBuilder.gameListViewController(with: userId)
   }
 
   static func gameListViewController(with userId: Int) -> UIViewController? {

@@ -1,5 +1,5 @@
 //
-//  ProfileRouter.swift
+//  ProfileBuilder.swift
 //  Steamy
 //
 //  Created by Alexey Sidorov on 24.11.2019.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProfileRouter: BaseBuilder {
+class ProfileBuilder: BaseBuilder {
 
   static var patterns: [String] = []
 
@@ -18,7 +18,7 @@ class ProfileRouter: BaseBuilder {
       let userId = Int(idParam) else {
         return nil
     }
-    return ProfileRouter.profileViewController(with: userId)
+    return ProfileBuilder.profileViewController(with: userId)
   }
 
   static func profileViewController(with userId: Int) -> UIViewController? {

@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class GameRouter: BaseBuilder {
+class GameBuilder: BaseBuilder {
 
   static var patterns: [String] {
     return ["user"]
@@ -23,7 +23,7 @@ class GameRouter: BaseBuilder {
       let gameId = Int(idParam) else {
         return nil
     }
-    return GameRouter.gameViewController(with: userId, gameId: gameId)
+    return GameBuilder.gameViewController(with: userId, gameId: gameId)
   }
 
   static func gameViewController(with userId: Int, gameId: Int) -> UIViewController? {

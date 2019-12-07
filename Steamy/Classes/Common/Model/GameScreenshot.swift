@@ -10,6 +10,8 @@ import Foundation
 import ObjectMapper
 
 class GameScreenshot: Mappable {
+  
+  // MARK: -
 
   var id: Int?
   var thumbnailURL: URL?

@@ -21,6 +21,4 @@ class Session {
   /// Don't change!
   /// This value is static and relates to CS: GO App.
   var gameId: Int = 730
-
-  var friendList: [Int] = []
 }

@@ -105,7 +105,7 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
       //show
       guard
         let userId = Int(section.identifier.split(separator: "_").last ?? ""),
-        let userViewController = UserRouter.userViewController(with: userId) else {
+        let userViewController = UserBuilder.userViewController(with: userId) else {
         return
       }
       showControllerSubject.onNext(userViewController)

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class UserRouter: BaseBuilder {
+class UserBuilder: BaseBuilder {
 
   static var patterns: [String] {
     return ["user"]
@@ -20,7 +20,7 @@ class UserRouter: BaseBuilder {
       let userId = Int(idParam) else {
         return nil
     }
-    return UserRouter.userViewController(with: userId)
+    return UserBuilder.userViewController(with: userId)
   }
 
   static func userViewController(with userId: Int) -> UIViewController? {
