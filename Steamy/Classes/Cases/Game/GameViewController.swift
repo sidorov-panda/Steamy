@@ -142,6 +142,7 @@ class GameViewController: BaseViewController, ControllerProtocol {
     tableView.register(TextCell.self, forCellReuseIdentifier: "TextCell")
     tableView.register(KeyValueCell.self, forCellReuseIdentifier: "KeyValueCell")
     tableView.register(ArticleCell.self, forCellReuseIdentifier: "ArticleCell")
+    tableView.register(AchievementCell.self, forCellReuseIdentifier: "AchievementCell")
   }
 
   // MARK: -

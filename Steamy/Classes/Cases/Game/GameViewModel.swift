@@ -408,9 +408,10 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   func achievementCells() -> [BaseCellItem] {
     return (achievments[safe: 0..<(shouldShowAllAchievements ? achievments.count : achievementsOnPage)] ?? [])
       .map { (achie) -> BaseCellItem in
-        let achCell = TitleCellItem(reuseIdentifier: "TitleCell",
-                                    identifier: "TitleCellAchievements_\(achie.name ?? String.random())")
+        let achCell = AchievementCellItem(reuseIdentifier: "AchievementCell",
+                                      identifier: "AchievementCell_\(achie.name ?? String.random())")
         achCell.title = achie.displayName ?? achie.name
+        achCell.imageURL = achie.iconURL
         return achCell
     }
   }
