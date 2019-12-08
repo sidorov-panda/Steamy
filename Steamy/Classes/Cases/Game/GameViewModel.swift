@@ -145,7 +145,7 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       }
     }).disposed(by: disposeBag)
   }
-  
+
   // MARK: -
 
   private var isLoadingNews = false
