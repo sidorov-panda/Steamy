@@ -5,9 +5,6 @@ PODS:
   - Charts (3.4.0):
     - Charts/Core (= 3.4.0)
   - Charts/Core (3.4.0)
-  - ChartsRealm (3.4.0):
-    - Charts (~> 3.4.0)
-    - RealmSwift (~> 3.18.0)
   - Differentiator (4.0.1)
   - ImageSlideshow (1.8.1):
     - ImageSlideshow/Core (= 1.8.1)
@@ -45,7 +42,6 @@ DEPENDENCIES:
   - Alamofire
   - AlamofireImage
   - Charts
-  - ChartsRealm
   - ImageSlideshow (~> 1.8.1)
   - ImageSlideshow/Alamofire
   - ObjectMapper
@@ -63,7 +59,6 @@ SPEC REPOS:
     - Alamofire
     - AlamofireImage
     - Charts
-    - ChartsRealm
     - Differentiator
     - ImageSlideshow
     - ObjectMapper
@@ -83,7 +78,6 @@ SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   AlamofireImage: be9963c6582d68b39e89191f64c82a7d7bf40fdd
   Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
-  ChartsRealm: 2ae8bf478211a94b3b6dd20738db0b9b132eb66b
   Differentiator: 886080237d9f87f322641dedbc5be257061b0602
   ImageSlideshow: 634865d7d4e96f21e3830a31b51bde768cc94cea
   ObjectMapper: 70187b8941977c62ccfb423caf6b50be405cabf0
@@ -99,6 +93,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: 07481f719a12391eb3e7893dc4fefe49628a21c5
+PODFILE CHECKSUM: 2a73ca69a594b97e2b59d33d37c9c0ab2af940f4
 
 COCOAPODS: 1.8.4

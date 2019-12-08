@@ -10,6 +10,7 @@ target 'Steamy' do
   pod 'RxDataSources'
   pod 'ObjectMapper'
   pod 'RealmSwift'
+  pod 'RxRealm'
   pod 'SteamLogin'
   pod 'SnapKit'
   pod 'Charts'
