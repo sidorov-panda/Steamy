@@ -61,11 +61,11 @@ class TwoTileCell: BaseCell {
 
   func configureUI() {
 
-//    addSubview(wrapperView)
-//    wrapperView.snp.makeConstraints { (maker) in
-//      maker.leading.trailing.top.bottom.equalTo(self)
-//      maker.height.equalTo(90)
-//    }
+    addSubview(wrapperView)
+    wrapperView.snp.makeConstraints { (maker) in
+      maker.leading.trailing.top.bottom.equalTo(self)
+      maker.height.equalTo(90)
+    }
 
     backgroundColor = .defaultBackgroundCellColor
 
