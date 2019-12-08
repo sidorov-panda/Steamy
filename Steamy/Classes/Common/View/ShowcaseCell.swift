@@ -42,8 +42,8 @@ class ShowcaseCell: BaseCell {
     guard let item = item as? ShowcaseCellItem else {
       return
     }
-
-    zip([["Played": item.hoursPlayed ?? "0 h"], ["Friends": "\(item.friendsCount ?? 0)"], ["Games": "\(item.gamesCount ?? 0)"]],
+    //TODO: make titles customizable
+    zip([["Played": item.hoursPlayed ?? "0 h"], ["Badges": "\(item.badgesCount ?? 0)"], ["Games": "\(item.gamesCount ?? 0)"]],
         tiles).forEach { (val, tile) in
           tile.valueLabel.text = val.values.first ?? ""
           tile.titleLabel.text = val.keys.first ?? ""
@@ -56,7 +56,7 @@ class ShowcaseCell: BaseCell {
     scrollView.showsHorizontalScrollIndicator = false
     scrollView.showsVerticalScrollIndicator = false
     scrollView.snp.makeConstraints { (maker) in
-      maker.height.equalTo(90)
+      maker.height.greaterThanOrEqualTo(90)
       maker.leading.equalToSuperview()
       maker.trailing.equalToSuperview()
       maker.bottom.equalToSuperview().priority(.medium)
@@ -93,16 +93,17 @@ class ShowcaseCell: BaseCell {
                                        value: "",
                                        size: CGSize(width: 153, height: 83),
                                        color: UIColor(red: 0.165, green: 0.2, blue: 0.596, alpha: 1))
-
+    playedTile.valueLabel.numberOfLines = 1
     let friendsTile = TileView.makeTile(title: "",
                                         value: "",
                                         size: CGSize(width: 83, height: 83),
                                         color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
-
+    friendsTile.valueLabel.numberOfLines = 1
     let gamesTile = TileView.makeTile(title: "",
                                       value: "",
                                       size: CGSize(width: 83, height: 83),
                                       color: UIColor(red: 0.18, green: 0.18, blue: 0.325, alpha: 1))
+    gamesTile.valueLabel.numberOfLines = 1
     return [playedTile, friendsTile, gamesTile]
   }
 }

@@ -20,7 +20,7 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
     
   }
 
-  func usersData(with ids: [Int], completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
+  func usersData(with ids: [Int], completion: (([UserManagerRealmProvider.JSONObject]?, Error?) -> ())?) {
     let objects = realm.objects(UserDB.self).toArray().filter { (user) -> Bool in
       //HACK since Realm doesn't support list queries yet
       guard let intId = Int((user.steamidPk ?? "")) else {
@@ -39,15 +39,14 @@ class UserManagerRealmProvider: UserManagerProviderProtocol {
         "loccityid": userDbObj.cityCode.value
       ]
     }
-    let resp = ["response": ["players": users]]
-    completion?(resp, nil)
+    completion?(users, nil)
   }
 
   func ownedGamesData(with userId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
     
   }
 
-  func recentlyPlayedGamesData(with userId: Int, completion: ((UserManagerRealmProvider.JSONObject?, Error?) -> ())?) {
+  func recentlyPlayedGamesData(with userId: Int, completion: (([UserManagerRealmProvider.JSONObject]?, Error?) -> ())?) {
     
   }
 

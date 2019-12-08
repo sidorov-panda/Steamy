@@ -26,14 +26,16 @@ class TileView: UIView {
 
     view.titleLabel.snp.makeConstraints { (maker) in
       maker.leading.equalTo(view).offset(8)
-      maker.bottom.equalTo(view).offset(-8)
       maker.trailing.equalTo(view).offset(-5)
+      maker.bottom.equalTo(view).offset(-8)
     }
 
     view.valueLabel.adjustsFontSizeToFitWidth = true
     view.valueLabel.text = value
     view.valueLabel.font = UIFont.systemFont(ofSize: 28.0)
-    view.valueLabel.numberOfLines = 1
+    view.valueLabel.adjustsFontSizeToFitWidth = true
+    view.valueLabel.numberOfLines = 0
+    view.valueLabel.minimumScaleFactor = 0.1
     view.valueLabel.textColor = .white
     view.addSubview(view.valueLabel)
 
@@ -41,6 +43,7 @@ class TileView: UIView {
       maker.leading.equalTo(view).offset(8)
       maker.top.equalTo(view).offset(8)
       maker.trailing.equalTo(view).offset(-5)
+      maker.bottom.lessThanOrEqualTo(view.titleLabel.snp.top).offset(2)
     }
     return view
   }

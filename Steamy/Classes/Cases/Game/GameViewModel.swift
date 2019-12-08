@@ -98,8 +98,9 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: -
 
   func bind() {
-    viewDidLoadSubject.subscribe(onNext: { [weak self] (_) in
+    viewDidLoadSubject.do(afterNext: { [weak self] (_) in
       self?.isLoadingSubject.onNext(true)
+    }).subscribe(onNext: { [weak self] (_) in
       self?.getGameInfo()
       self?.getAchievements()
       self?.getNews()
@@ -110,18 +111,21 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
         return
       }
       if
+        //TODO: combine into one id
         section.identifier == "TitleCellAchievements_ShowAll" ||
         section.identifier == "TitleCellAchievements_HideAll" {
         self?.shouldShowAllAchievements = !(self?.shouldShowAllAchievements ?? false)
         self?.createSections()
       }
       if
+        //TODO: combine into one id
         section.identifier == "TitleCellStats_ShowAll" ||
         section.identifier == "TitleCellStats_HideAll" {
         self?.shouldShowAllStats = !(self?.shouldShowAllStats ?? false)
         self?.createSections()
       }
       if
+        //TODO: combine into one id
         section.identifier == "TitleCellArticle_ShowAll" ||
         section.identifier == "TitleCellArticle_HideAll" {
         self?.shouldShowAllNews = !(self?.shouldShowAllNews ?? false)
@@ -141,15 +145,24 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       }
     }).disposed(by: disposeBag)
   }
+  
+  // MARK: -
 
+  private var isLoadingNews = false
   func getNews() {
+    isLoadingNews = true
     self.dependencies.gameManager.news(gameId: gameId) { [weak self] (articles, error) in
-      self?.articles = (articles ?? []).map({ (article) -> Article in
-        let newArticle = article
-        newArticle.contents = article.contents?.htmlStripped
-        return newArticle
-      })
-      self?.createSections()
+      DispatchQueue.global().async {
+        self?.articles = (articles ?? []).map({ (article) -> Article in
+          let newArticle = article
+          newArticle.contents = article.contents?.htmlStripped
+          return newArticle
+        })
+        DispatchQueue.main.async {
+          self?.isLoadingNews = false
+          self?.createSections()
+        }
+      }
     }
   }
 
@@ -267,6 +280,9 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
       if (playedTimeComponents.1) > 0 {
         timePlayedStr += "\(playedTimeComponents.1) min"
       }
+      if timePlayedStr == "" {
+        timePlayedStr = "0 h"
+      }
       if timePlayedStr != "" && achievments.count > 0 {
         gameStatCell.secondTileKey = "Time Played"
         gameStatCell.secondTileValue = timePlayedStr
@@ -340,15 +356,13 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
     var cells = [BaseCellItem]()
     // Building Game Info Section
     if let game = self.game {
-      cells.append(priceCellItem(game: game))
-      cells.append(aboutCellItem(game: game))
-      cells.append(descCellItem(game: game))
-      var section = BaseTableSectionItem(header: " ", items: cells)
-      section.identifier = "BaseTableSection_1"
-      sctns.append(section)
+      sctns.append(descSection())
+      if let releaseSection = releaseDateSection() {
+        sctns.append(releaseSection)
+      }
     }
 
-    if articles.count > 0 {
+    if articles.count > 0 || isLoadingNews {
       sctns.append(newsSection())
     }
 
@@ -356,6 +370,59 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
   }
 
   // MARK: - CellItems
+
+  func releaseDateSection() -> BaseTableSectionItem? {
+    guard let releaseDateString = self.game?.releaseDate else {
+      return nil
+    }
+
+    let cell = TextCellItem(reuseIdentifier: "TextCell", identifier: "TextCell_ReleaseDate")
+    cell.text = releaseDateString
+    var release = BaseTableSectionItem(header: "RELEASE DATE", items: [cell])
+    release.identifier = "ReleaseSection"
+    return release
+  }
+
+  //Game descfiption cells
+  func descSection() -> BaseTableSectionItem {
+    var descItems = [BaseCellItem]()
+
+    let pricePlatoformCell = TwoTileCellItem(reuseIdentifier: "TwoTileCell",
+                                             identifier: "TwoTileCell_PricePlatform")
+    pricePlatoformCell.firstTileKey = "Price"
+    pricePlatoformCell.firstTileValue = (game?.isFree ?? false) ? "Free" : (game?.price?.htmlStripped ?? "No Price")
+    pricePlatoformCell.secondTileKey = ""
+
+    var platforms = ""
+    if game?.platformWindows == true {
+      platforms += "\nWindows"
+    }
+    if game?.platformMac == true {
+      platforms += "\nMac"
+    }
+    if game?.platformMac == true {
+      platforms += "\nLinux"
+    }
+    pricePlatoformCell.secondTileValue = platforms.trimmingCharacters(in: .newlines)
+    descItems.append(pricePlatoformCell)
+
+    let metascoreCell = TwoTileCellItem(reuseIdentifier: "TwoTileCell",
+                                        identifier: "TwoTileCell_Metascore")
+    metascoreCell.firstTileKey = "Metascore"
+    metascoreCell.firstTileValue = String(game?.metacritic ?? 0)
+    metascoreCell.secondTileKey = "Recommendations"
+    metascoreCell.secondTileValue = String(game?.recommendations ?? 0)
+
+    descItems.append(metascoreCell)
+
+    if let game = game {
+      descItems.append(aboutCellItem(game: game))
+    }
+
+    var desc = BaseTableSectionItem(header: "DESCRIPTION", items: descItems)
+    desc.identifier = "DescriptionSection"
+    return desc
+  }
 
   func newsSection() -> BaseTableSectionItem {
     var section = BaseTableSectionItem(header: "NEWS", items: articlesCellItems())
@@ -365,6 +432,10 @@ class GameViewModel: BaseViewModel, ViewModelProtocol {
 
   private let articleDateFormatter = DateFormatter(withFormat: "MMM dd yyyy", locale: NSLocale.current.identifier)
   func articlesCellItems() -> [BaseCellItem] {
+    if isLoadingNews {
+      return [LoadingCellItem(reuseIdentifier: "LoadingCell", identifier: "LoadingCell_News")]
+    }
+
     var cells = (articles[safe: 0..<(shouldShowAllNews ? articles.count : articlesOnPage)] ?? [])
       .map { (article) -> BaseCellItem in
         let cell = ArticleCellItem(reuseIdentifier: "ArticleCell",

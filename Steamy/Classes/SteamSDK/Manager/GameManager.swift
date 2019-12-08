@@ -88,7 +88,7 @@ class GameManager: BaseManager {
         let resp = response?[String(id)] as? [String: Any],
         let data = resp["data"] as? [String: Any],
         error == nil else {
-        err = error
+          err = error
         return
       }
 

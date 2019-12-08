@@ -64,6 +64,7 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   private func bind() {
     viewWillAppearSubject.subscribe(onNext: { [weak self] (_) in
       self?.loadFriends()
+      self?.createSections()
     }).disposed(by: disposeBag)
 
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
@@ -76,11 +77,19 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
   func createSections() {
     var sctns = [BaseTableSectionItem]()
 
+    if isLoading && users.count == 0 {
+      let cells = [LoadingCellItem(reuseIdentifier: "LoadingCell",
+                                   identifier: "LoadingCell")]
+      var section = BaseTableSectionItem(header: " ", items: cells)
+      section.identifier = "LoadingSection"
+      self.sectionsRelay.accept([section])
+      return
+    }
+
     let onlineFriendCells: [BaseCellItem] = users.sorted(by: { (user1, user2) -> Bool in
       return (user1.nickname ?? user1.name ?? "") > (user2.nickname ?? user2.name ?? "")
     }).filter({ (user) -> Bool in
-      return
-      (user.personastate == .online
+      return (user.personastate == .online
         || user.personastate == .lookingToPlay
         || user.personastate == .busy
         || user.personastate == .away
@@ -91,18 +100,38 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
                                           identifier: "FriendCell_\(user.steamid ?? 0)")
       friendCellItem.name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
       friendCellItem.avatarURL = user.avatarURL
+      friendCellItem.status = "Online"
       return friendCellItem
     }
 
     let offlineFriendCells: [BaseCellItem] = users.filter({ (user) -> Bool in
       return user.personastate == .offline
     }).sorted(by: { (user1, user2) -> Bool in
-      return (user1.nickname ?? user1.name ?? "") > (user2.nickname ?? user2.name ?? "")
+      return (user1.lastLogoff ?? Date()) > (user2.lastLogoff ?? Date())
     }).map { (user) -> FriendCellItem in
       let friendCellItem = FriendCellItem(reuseIdentifier: "FriendCell",
                                           identifier: "FriendCell_\(user.steamid ?? 0)")
       friendCellItem.name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
       friendCellItem.avatarURL = user.avatarURL
+
+      let timeSinceLogoff = -Int(user.lastLogoff?.timeIntervalSinceNow ?? 0)
+      let timeComponents = timeSinceLogoff.secondsToHoursMinutesSeconds()
+      var timeAgo = ""
+      if (timeComponents.0) > 0 {
+        timeAgo += "\(timeComponents.0) h"
+      }
+      if (timeComponents.1) > 0 && (timeComponents.0) < 0 {
+        if timeAgo != "" {
+          timeAgo += " "
+        }
+        timeAgo += "\(timeComponents.1) min"
+      }
+      if timeAgo != "" {
+        timeAgo += " ago"
+      }
+
+      friendCellItem.status = timeAgo
+      friendCellItem.statusColor = UIColor(red: 0.988, green: 0.988, blue: 0.988, alpha: 0.5)
       return friendCellItem
     }
 
@@ -138,7 +167,10 @@ class FriendsViewModel: BaseViewModel, ViewModelProtocol {
       //show
       guard
         let userId = Int(section.identifier.split(separator: "_").last ?? ""),
-        let userViewController = UserBuilder.userViewController(with: userId) else {
+        let user = users.filter({ (user) -> Bool in
+          return userId == user.steamid
+        }).first,
+        let userViewController = UserBuilder.userViewController(with: user) else {
         return
       }
       showControllerSubject.onNext(userViewController)

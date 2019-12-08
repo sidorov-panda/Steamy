@@ -60,12 +60,8 @@ class UserManager: BaseManager {
         return
       }
 
-      if
-        let response = response?["response"] as? [String: Any],
-        let users = response["players"] as? [[String: Any]],
-        let firstUser = users.first,
-        let mappedUser = Mapper<User>().map(JSON: firstUser) {
-          user = mappedUser
+      if let response = response, let mappedUser = Mapper<User>().map(JSON: response) {
+        user = mappedUser
       } else {
         err = UserManagerError.noUser
       }
@@ -87,10 +83,8 @@ class UserManager: BaseManager {
         return
       }
 
-      if
-        let response = response?["response"] as? [String: Any],
-        let usersArray = response["players"] as? [[String: Any]] {
-          users = Mapper<User>().mapArray(JSONArray: usersArray)
+      if let usersArray = response {
+        users = Mapper<User>().mapArray(JSONArray: usersArray)
       } else {
         err = UserManagerError.wrongResponse
       }
@@ -137,10 +131,8 @@ class UserManager: BaseManager {
         return
       }
 
-      if
-        let response = response?["response"] as? [String: Any],
-        let gamesArray = response["games"] as? [[String: Any]] {
-          games = Mapper<UserGame>().mapArray(JSONArray: gamesArray)
+      if let gamesArr = response {
+        games = Mapper<UserGame>().mapArray(JSONArray: gamesArr)
       } else {
         err = UserManagerError.wrongResponse
       }

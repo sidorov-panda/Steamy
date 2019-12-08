@@ -89,6 +89,7 @@ class ProfileViewController: BaseViewController, ControllerProtocol {
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
     tableView.register(FavoriteGameCell.self, forCellReuseIdentifier: "FavoriteGameCell")
     tableView.register(ShowcaseCell.self, forCellReuseIdentifier: "ShowcaseCell")
+    tableView.register(LoadingCell.self, forCellReuseIdentifier: "LoadingCell")
   }
 
   func bind() {

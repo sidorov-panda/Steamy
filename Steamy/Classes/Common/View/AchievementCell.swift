@@ -41,7 +41,6 @@ class AchievementCell: BaseCell {
     textLabel?.text = item.title
     textLabel?.textColor = .white
     if let imageURL = item.imageURL {
-      imageView?.layer.cornerRadius = 3
       imageView?.af_setImage(withURL: imageURL,
                              placeholderImage: item.placeholderImage,
                              filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))
@@ -51,6 +50,8 @@ class AchievementCell: BaseCell {
   // MARK: -
 
   func configureUI() {
+    imageView?.layer.cornerRadius = 3
+    imageView?.clipsToBounds = true
     backgroundColor = .defaultBackgroundCellColor
     textLabel?.numberOfLines = 0
     textLabel?.textColor = .white

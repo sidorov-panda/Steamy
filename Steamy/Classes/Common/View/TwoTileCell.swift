@@ -26,7 +26,7 @@ class TwoTileCell: BaseCell {
   // MARK: -
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    super.init(style: .default, reuseIdentifier: reuseIdentifier)
 
     configureUI()
   }
@@ -56,8 +56,17 @@ class TwoTileCell: BaseCell {
   }
 
   // MARK: -
+  
+  let wrapperView = UIView()
 
   func configureUI() {
+
+    addSubview(wrapperView)
+    wrapperView.snp.makeConstraints { (maker) in
+      maker.leading.trailing.top.bottom.equalTo(self)
+      maker.height.equalTo(90)
+    }
+
     backgroundColor = .defaultBackgroundCellColor
 
     firstTile = TileView.makeTile(title: "",
@@ -74,19 +83,18 @@ class TwoTileCell: BaseCell {
     self.addSubview(secondTile!)
 
     firstTile?.snp.makeConstraints { maker in
+      maker.top.equalTo(self).offset(10)
       maker.leading.equalTo(self).offset(16)
-      maker.top.equalTo(self)
-      maker.bottom.equalTo(self)
+      maker.width.equalTo(self).dividedBy(2).offset(-20)
       maker.height.equalTo(83)
-      maker.width.equalTo(self).dividedBy(2).offset(-16)
     }
 
     secondTile?.snp.makeConstraints { maker in
-      maker.leading.equalTo(firstTile!.snp.trailing).offset(16)
+      maker.leading.equalTo(firstTile!.snp.trailing).offset(8)
       maker.trailing.equalTo(self).offset(-16)
-      maker.top.equalTo(self)
-      maker.bottom.equalTo(self)
-      maker.height.equalTo(83)
+      maker.top.equalTo(firstTile!)
+      maker.bottom.equalTo(firstTile!)
+      maker.height.equalTo(firstTile!)
     }
   }
 

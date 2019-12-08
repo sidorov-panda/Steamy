@@ -12,6 +12,8 @@ import AlamofireImage
 class FriendCellItem: BaseCellItem {
   var name: String?
   var avatarURL: URL?
+  var status: String?
+  var statusColor: UIColor?
   var placeholderImage: UIImage? = UIImage(named: "gamePlaceholderSmall")?
     .af_imageScaled(to: CGSize(width: 30, height: 30))
 }
@@ -21,7 +23,7 @@ class FriendCell: BaseCell {
   // MARK: -
 
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
     
     self.backgroundColor = .defaultBackgroundCellColor
   }
@@ -41,6 +43,10 @@ class FriendCell: BaseCell {
 
     self.textLabel?.text = item.name
     self.textLabel?.textColor = .white
+
+    self.detailTextLabel?.text = item.status
+    self.detailTextLabel?.textColor = item.statusColor ?? .white
+
     if let imageURL = item.avatarURL {
       self.imageView?.layer.cornerRadius = 15.0
       self.imageView?.clipsToBounds = true

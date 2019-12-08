@@ -136,7 +136,7 @@ class ChartCell: BaseCell {
     leftYAxis.spaceMax = 20
     leftYAxis.axisMaximum = maxYValue + 200
 
-    chartView.legend.textColor = UIColor(red: 0.29, green: 0.294, blue: 0.376, alpha: 1)
+    chartView.legend.textColor = .white
     chartView.notifyDataSetChanged()
   }
 }

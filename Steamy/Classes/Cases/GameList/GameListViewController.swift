@@ -98,6 +98,7 @@ class GameListViewController: BaseViewController, ControllerProtocol {
   func registerCells() {
     tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+    tableView.register(LoadingCell.self, forCellReuseIdentifier: "LoadingCell")
   }
 
   func bind() {

@@ -18,7 +18,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: - ViewModelProtocol
 
   struct Input {
-    
+    var viewDidLoad: AnyObserver<Void>
   }
 
   struct Output {
@@ -32,16 +32,19 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
 
   // MARK: -
 
+  private var viewDidLoadSubject = PublishSubject<Void>()
   private var nameSubject = PublishSubject<String?>()
   private var locationSubject = PublishSubject<String?>()
   private var levelSubject = PublishSubject<String?>()
   private var avatarSubject = PublishSubject<URL?>()
+  private var onlineSubject = PublishSubject<Bool>()
 
   func userInfoViewItem() -> UserInfoViewItem {
     return UserInfoViewItem(nameObservable: self.nameSubject.asObservable(),
                             locationObservable: self.locationSubject.asObservable(),
                             levelObservable: self.levelSubject.asObservable(),
-                            avatarObservable: self.avatarSubject.asObservable())
+                            avatarObservable: self.avatarSubject.asObservable(),
+                            onlineObservable: self.onlineSubject.asObservable())
   }
 
   func userViewControllers() -> [UIViewController] {
@@ -58,6 +61,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: -
 
   var userId: Int
+  var user: User?
 
   init?(userId: Int, dependencies: UserViewModelDependency) {
     self.userId = userId
@@ -65,9 +69,38 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    self.input = Input()
+    self.input = Input(viewDidLoad: viewDidLoadSubject.asObserver())
     self.output = Output(userInfoItem: self.userInfoViewItem,
                          userPages: self.userViewControllers)
+    bind()
+    loadUserData()
+  }
+
+  init?(user: User, dependencies: UserViewModelDependency) {
+    guard let userId = user.steamid else {
+      return nil
+    }
+
+    self.userId = userId
+    self.user = user
+
+    self.dependencies = dependencies
+
+    super.init()
+
+    self.input = Input(viewDidLoad: viewDidLoadSubject.asObserver())
+    self.output = Output(userInfoItem: self.userInfoViewItem,
+                         userPages: self.userViewControllers)
+
+    bind()
+  }
+
+  func bind() {
+    viewDidLoadSubject.asObservable().subscribe(onNext: { [weak self] (_) in
+      if let user = self?.user {
+        self?.setUser(user)
+      }
+    }).disposed(by: disposeBag)
 
     loadUserData()
   }
@@ -75,18 +108,7 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
   private func loadUserData() {
     self.dependencies.userManager.user(id: userId) { [weak self] (user, error) in
       if let user = user {
-        if
-          let countryCode = user.countryCode {
-          let geo = Geo(countryCode: countryCode, stateCode: user.stateCode, cityCode: String(user.cityCode ?? 0))
-          var location = geo.countryName ?? ""
-          if let cityName = geo.cityName {
-            location += ", \(cityName)"
-          }
-          self?.locationSubject.onNext(location)
-        }
-        let name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
-        self?.nameSubject.onNext(name)
-        self?.avatarSubject.onNext(user.avatarURL)
+        self?.setUser(user)
       }
     }
 
@@ -96,4 +118,21 @@ class UserViewModel: BaseViewModel, ViewModelProtocol {
       }
     }
   }
+
+  func setUser(_ user: User) {
+    if
+      let countryCode = user.countryCode {
+      let geo = Geo(countryCode: countryCode, stateCode: user.stateCode, cityCode: String(user.cityCode ?? 0))
+      var location = geo.countryName ?? ""
+      if let cityName = geo.cityName {
+        location += ", \(cityName)"
+      }
+      locationSubject.onNext(location)
+    }
+    let name = (user.nickname ?? user.name ?? "") + (user.visibilityState == .notVisible ? "🔒" : "")
+    nameSubject.onNext(name)
+    avatarSubject.onNext(user.avatarURL)
+    onlineSubject.onNext(user.personastate != .offline)
+  }
+
 }

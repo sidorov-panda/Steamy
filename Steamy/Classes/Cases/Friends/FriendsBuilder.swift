@@ -25,13 +25,14 @@ class FriendsBuilder: BaseBuilder {
 
   static func friendsViewController(with userId: Int) -> UIViewController? {
     var provider: UserManagerProviderProtocol
-//    if userId == Session.shared.userId {
+    provider = UserManagerSteamAPIProvider()
+    if userId == Session.shared.userId {
+      //No cache for logged user
+      provider.cacheEnabled = false
 //      provider = UserManagerRealmProvider()
-//    } else {
-      provider = UserManagerSteamAPIProvider()
-    //Turning off the cache to get latest Online info
-    provider.cacheEnabled = false
-//    }
+    } else {
+      provider.cacheEnabled = true
+    }
     let userManager = UserManager(provider: provider)
     guard
       let friendsViewModel = FriendsViewModel(userId: userId,

@@ -10,7 +10,7 @@ import Foundation
 import ObjectMapper
 
 class User: Mappable {
-  
+
   enum PersonaState: Int {
     case offline = 0
     case online
@@ -20,7 +20,7 @@ class User: Mappable {
     case lookingToTrade
     case lookingToPlay
   }
-  
+
   enum VisibilityState: Int {
     case notVisible = 1
     case `public` = 3

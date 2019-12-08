@@ -16,6 +16,7 @@ struct UserInfoViewItem {
   var locationObservable: Observable<String?>
   var levelObservable: Observable<String?>
   var avatarObservable: Observable<URL?>
+  var onlineObservable: Observable<Bool>
 }
 
 class UserInfoView: UIView {
@@ -27,6 +28,7 @@ class UserInfoView: UIView {
   var nameLabel: UILabel!
   var locationLabel: UILabel!
   var levelLabel: UILabel!
+  var onlineLabel: UILabel!
   var avatarImageView: UIImageView!
 
   // MARK: -
@@ -53,17 +55,26 @@ class UserInfoView: UIView {
       .drive(locationLabel.rx.text)
       .disposed(by: disposeBag)
 
-    item.levelObservable
-      .asDriver(onErrorJustReturn: nil)
-      .drive(levelLabel.rx.text)
-      .disposed(by: disposeBag)
+//    item.levelObservable
+//      .asDriver(onErrorJustReturn: nil)
+//      .drive(levelLabel.rx.text)
+//      .disposed(by: disposeBag)
+
+    Observable
+      .combineLatest(item.levelObservable, item.onlineObservable)
+      .asDriver(onErrorJustReturn: (nil, false))
+      .drive(onNext: { [weak self] (val) in
+        let (level, isOnline) = val
+        self?.onlineLabel.text = isOnline ? "Online" : ""
+        self?.levelLabel.text = (level ?? "") + (isOnline ? " - " : "")
+    }).disposed(by: disposeBag)
 
     item.avatarObservable
       .asDriver(onErrorJustReturn: nil)
       .drive(onNext: { [weak self] (url) in
         if let url = url {
           let filter = AspectScaledToFillSizeWithRoundedCornersFilter(
-            size: self?.avatarImageView.frame.size ?? .zero,
+            size: CGSize(width: 83, height: 83),
             radius: 41
           )
           self?.avatarImageView.af_setImage(
@@ -102,9 +113,14 @@ class UserInfoView: UIView {
     addSubview(avatarImageView)
 
     locationLabel = UILabel()
-    locationLabel.textColor = UIColor(red: 0.29, green: 0.294, blue: 0.376, alpha: 1)
+    locationLabel.textColor = UIColor(red: 0.318, green: 0.318, blue: 0.341, alpha: 1)
     locationLabel.font = UIFont.systemFont(ofSize: 12.0)
     addSubview(locationLabel)
+
+    onlineLabel = UILabel()
+    onlineLabel.textColor = .green
+    onlineLabel.font = UIFont.systemFont(ofSize: 12)
+    addSubview(onlineLabel)
 
     avatarImageView.snp.makeConstraints { (maker) in
       maker.height.equalTo(83)
@@ -116,14 +132,18 @@ class UserInfoView: UIView {
     levelLabel.snp.makeConstraints { (maker) in
       maker.top.equalTo(self).offset(0)
       maker.left.equalTo(self).offset(16)
-      maker.trailing.equalTo(avatarImageView).offset(-5)
       maker.height.greaterThanOrEqualTo(15)
+    }
+
+    onlineLabel.snp.makeConstraints { (maker) in
+      maker.top.bottom.equalTo(levelLabel)
+      maker.leading.equalTo(levelLabel.snp.trailing).offset(0)
     }
 
     nameLabel.snp.makeConstraints { (maker) in
       maker.top.equalTo(levelLabel.snp.bottom).offset(3)
       maker.leading.equalTo(levelLabel.snp.leading)
-      maker.trailing.equalTo(avatarImageView.snp.leading).offset(-5)
+      maker.trailing.equalTo(avatarImageView.snp.leading).offset(0)
     }
 
     locationLabel.snp.makeConstraints { (maker) in

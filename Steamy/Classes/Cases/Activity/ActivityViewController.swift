@@ -95,6 +95,7 @@ class ActivityViewController: BaseViewController, ControllerProtocol {
     tableView.register(GameCell.self, forCellReuseIdentifier: "GameCell")
     tableView.register(ActivityCell.self, forCellReuseIdentifier: "ActivityCell")
     tableView.register(TitleCell.self, forCellReuseIdentifier: "TitleCell")
+    tableView.register(LoadingCell.self, forCellReuseIdentifier: "LoadingCell")
   }
 
   func bind() {

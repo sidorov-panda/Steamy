@@ -36,4 +36,19 @@ class UserBuilder: BaseBuilder {
     userVC.configure(with: userViewModel)
     return userVC
   }
+
+  static func userViewController(with user: User) -> UIViewController? {
+
+    let steamAPI = UserManagerSteamAPIProvider()
+    let userManager = UserManager(provider: steamAPI)
+    guard
+      let userViewModel = UserViewModel(user: user,
+                                        dependencies: UserViewModelDependency(userManager: userManager)) else {
+        return nil
+    }
+    let userVC = UserViewController()
+    userVC.configure(with: userViewModel)
+    return userVC
+  }
+
 }

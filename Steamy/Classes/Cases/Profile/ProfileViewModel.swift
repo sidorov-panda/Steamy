@@ -66,33 +66,20 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    dependencies.userManager.games(userId: userId) { [weak self] (games, error) in
-      self?.games = games ?? []
-      self?.createSections()
-      
-      if (games?.filter({ (game) -> Bool in
-        guard let gameId = game.id, let favoriteId = self?.favoriteGameid else {
-          return false
-        }
-        return gameId == favoriteId
-      }).count ?? 0) > 0 {
-        self?.getStatistic()
-      }
-    }
+    getGames()
 
     dependencies.userManager.badges(userId: userId) { [weak self] (badges, error) in
       self?.badgesCount = badges?.count ?? 0
       self?.createSections()
     }
 
-    dependencies.userManager.friends(userId: userId) { [weak self] (users, error) in
-      self?.friendsCount = users?.count ?? 0
-      self?.createSections()
-    }
+    getFriends()
 
     didTapCellSubject.asObserver().subscribe(onNext: { [weak self] (indexPath) in
       self?.didTap(on: indexPath)
-      }).disposed(by: disposeBag)
+    }).disposed(by: disposeBag)
+
+    createSections()
   }
 
   // MARK: -
@@ -108,8 +95,20 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   var badgesCount: Int?
   var groups: Int?
 
+  private var isLoadingGames = false
+
+  //TODO: move CellItems to separate methods
   func createSections() {
     var sctns = [BaseTableSectionItem]()
+
+    if isLoadingGames && games.count == 0 {
+      let cells = [LoadingCellItem(reuseIdentifier: "LoadingCell",
+                                   identifier: "LoadingCell")]
+      var section = BaseTableSectionItem(header: " ", items: cells)
+      section.identifier = "LoadingSection"
+      self.sectionsRelay.accept([section])
+      return
+    }
 
     if games.count > 0 && badgesCount != nil && friendsCount != nil {
       let totalPlayedComponents = (games.reduce(0, {(result: Int, item: UserGame) -> Int in
@@ -127,7 +126,7 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
       let totalPlayedCell = ShowcaseCellItem(reuseIdentifier: CellReuseIdentifiers.showcase.rawValue,
                                              identifier: "ShowcaseCell")
       totalPlayedCell.hoursPlayed = totalPlayedString
-      totalPlayedCell.friendsCount = friendsCount ?? 0
+//      totalPlayedCell.friendsCount = friendsCount ?? 0
       totalPlayedCell.badgesCount = badgesCount ?? 0
       totalPlayedCell.gamesCount = games.count
       var totalPlayedSection = BaseTableSectionItem(header: "ACHIEVEMENT SHOWCASE", items: [totalPlayedCell])
@@ -218,6 +217,31 @@ class ProfileViewModel: BaseViewModel, ViewModelProtocol {
   // MARK: - CellItems
 
   // MARK: -
+
+  func getGames() {
+    self.isLoadingGames = true
+    dependencies.userManager.games(userId: userId) { [weak self] (games, error) in
+      self?.games = games ?? []
+      self?.isLoadingGames = false
+      self?.createSections()
+      
+      if (games?.filter({ (game) -> Bool in
+        guard let gameId = game.id, let favoriteId = self?.favoriteGameid else {
+          return false
+        }
+        return gameId == favoriteId
+      }).count ?? 0) > 0 {
+        self?.getStatistic()
+      }
+    }
+  }
+
+  func getFriends() {
+    dependencies.userManager.friends(userId: userId) { [weak self] (users, error) in
+      self?.friendsCount = users?.count ?? 0
+      self?.createSections()
+    }
+  }
 
   func getStatistic() {
     if let favoriteGameid = favoriteGameid {

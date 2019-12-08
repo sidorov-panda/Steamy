@@ -40,6 +40,8 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
 
   var userId: Int
   var dependencies: GameListViewModelDependency
+  
+  var isLoadingGames = false
 
   init?(userId: Int, dependencies: GameListViewModelDependency) {
     self.userId = userId
@@ -52,9 +54,11 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
 
     super.init()
 
-    self.dependencies.userManager.games(userId: userId) { (games, error) in
-      self.games = games ?? []
-      self.createSections()
+    isLoadingGames = true
+    self.dependencies.userManager.games(userId: userId) { [weak self] (games, error) in
+      self?.games = games ?? []
+      self?.isLoadingGames = false
+      self?.createSections()
     }
 
     bind()
@@ -74,9 +78,14 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
       self?.didTap(on: indexPath)
     }).disposed(by: disposeBag)
 
-    searchTermSubject.asObserver().subscribe(onNext: { [weak self] (term) in
-      self?.createSections()
-    }).disposed(by: disposeBag)
+    searchTermSubject
+      .asObserver()
+      .throttle(1.5, scheduler: MainScheduler.instance)
+      .subscribe(onNext: { [weak self] (term) in
+        DispatchQueue.global().async {
+          self?.createSections()
+        }
+      }).disposed(by: disposeBag)
 
   }
 
@@ -103,7 +112,16 @@ class GameListViewModel: BaseViewModel, ViewModelProtocol {
   var games: [UserGame] = []
 
   func createSections() {
-    var gameCells: [BaseCellItem] = self.games.filter({ (game) -> Bool in
+    if isLoadingGames && games.count == 0 {
+      let cells = [LoadingCellItem(reuseIdentifier: "LoadingCell",
+                                   identifier: "LoadingCell")]
+      var section = BaseTableSectionItem(header: " ", items: cells)
+      section.identifier = "LoadingSection"
+      self.sectionsRelay.accept([section])
+      return
+    }
+
+    var gameCells: [BaseCellItem] = games.filter({ (game) -> Bool in
       if let term = try! self.searchTermSubject.value()?.lowercased(), term.count > 0 {
         return (game.name ?? "").lowercased().contains(term)
       }

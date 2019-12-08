@@ -94,6 +94,7 @@ class UserViewController: ButtonBarPagerTabStripViewController, ControllerProtoc
 
   func bind() {
     userInfoView.configure(item: viewModel.output.userInfoItem())
+    viewModel.input.viewDidLoad.onNext(())
   }
 
   override public func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {

@@ -24,7 +24,9 @@ class GameCell: BaseCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-    self.backgroundColor = .defaultBackgroundCellColor
+    imageView?.layer.cornerRadius = 3
+    imageView?.clipsToBounds = true
+    backgroundColor = .defaultBackgroundCellColor
   }
 
   required init?(coder: NSCoder) {
@@ -43,7 +45,6 @@ class GameCell: BaseCell {
     self.textLabel?.text = item.name
     self.textLabel?.textColor = .white
     if let imageURL = item.iconURL {
-      self.imageView?.layer.cornerRadius = 3
       self.imageView?.af_setImage(withURL: imageURL,
                                   placeholderImage: item.placeholderImage,
                                   filter: ScaledToSizeFilter(size: CGSize(width: 30, height: 30)))

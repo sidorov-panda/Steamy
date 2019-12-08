@@ -13,9 +13,9 @@ protocol UserManagerProviderProtocol {
   typealias JSONObject = [String: Any]
   var cacheEnabled: Bool { get set }
   func userData(with userid: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func usersData(with ids: [Int], completion: ((JSONObject?, Error?) -> ())?)
+  func usersData(with ids: [Int], completion: (([JSONObject]?, Error?) -> ())?)
   func ownedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
-  func recentlyPlayedGamesData(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
+  func recentlyPlayedGamesData(with userId: Int, completion: (([JSONObject]?, Error?) -> ())?)
   func level(with userId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func achievementsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)
   func gameStatsData(with userId: Int, gameId: Int, completion: ((JSONObject?, Error?) -> ())?)

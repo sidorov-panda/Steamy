@@ -143,6 +143,7 @@ class GameViewController: BaseViewController, ControllerProtocol {
     tableView.register(KeyValueCell.self, forCellReuseIdentifier: "KeyValueCell")
     tableView.register(ArticleCell.self, forCellReuseIdentifier: "ArticleCell")
     tableView.register(AchievementCell.self, forCellReuseIdentifier: "AchievementCell")
+    tableView.register(LoadingCell.self, forCellReuseIdentifier: "LoadingCell")
   }
 
   // MARK: -
@@ -150,13 +151,14 @@ class GameViewController: BaseViewController, ControllerProtocol {
   var slideshow = ImageSlideshow(frame: CGRect(x: 0, y: 0, width: 10, height: 140))
 
   func configureUI() {
-    tableView.backgroundColor = .defaultBackgroundCellColor
+    view.addSubview(tableView)
+    view.backgroundColor = .defaultBackgroundCellColor
     tableView.tableFooterView = UIView()
-    tableView.estimatedRowHeight = 100
+    tableView.backgroundColor = .defaultBackgroundCellColor
+    tableView.estimatedRowHeight = 55
     tableView.rowHeight = UITableView.automaticDimension
     tableView.separatorStyle = .none
 
-    view.addSubview(tableView)
     tableView.snp.makeConstraints { (maker) in
       maker.top.equalTo(self.view)
       maker.left.equalTo(self.view)

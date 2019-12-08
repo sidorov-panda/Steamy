@@ -24,6 +24,12 @@ class Game: Mappable {
   var screenshotURLs: [URL]?
   var price: String?
   var screenshots: [GameScreenshot]?
+  var platformWindows = false
+  var platformMac = false
+  var platformLinux = false
+  var metacritic: Int?
+  var recommendations: Int?
+  var releaseDate: String?
 
   // MARK: - Mappable
 
@@ -43,5 +49,11 @@ class Game: Mappable {
     price <- map["price_overview.final_formatted"]
     isFree <- map["is_free"]
     screenshots <- map["screenshots"]
+    platformWindows <- map["platforms.windows"]
+    platformMac <- map["platforms.mac"]
+    platformLinux <- map["platforms.linux"]
+    metacritic <- map["metacritic.score"]
+    recommendations <- map["recommendations.total"]
+    releaseDate <- map["release_date.date"]
   }
 }

@@ -32,23 +32,44 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
         completion?(resp, err)
       }
 
-      resp = response
-      err = error
+      guard error == nil else {
+        err = error
+        return
+      }
+
+      if
+        let response = response?["response"] as? [String: Any],
+        let users = response["players"] as? [[String: Any]],
+        let firstUser = users.first {
+          resp = firstUser
+      } else {
+        err = UserManagerSteamAPIProviderError.wrongResponse
+      }
     }
   }
 
-  func usersData(with ids: [Int], completion: ((JSONObject?, Error?) -> ())?) {
+  func usersData(with ids: [Int], completion: (([JSONObject]?, Error?) -> ())?) {
     steamAPI.request(.users(ids: ids), refresh: !cacheEnabled) { (response, error) in
 
-      var resp: JSONObject?
+      var resp: [JSONObject]?
       var err: Error?
 
       defer {
         completion?(resp, err)
       }
 
-      resp = response
-      err = error
+      guard error == nil else {
+        err = error
+        return
+      }
+
+      if
+        let response = response?["response"] as? [String: Any],
+        let usersArray = response["players"] as? [[String: Any]] {
+        resp = usersArray
+      } else {
+        err = UserManagerSteamAPIProviderError.wrongResponse
+      }
     }
   }
 
@@ -58,9 +79,26 @@ class UserManagerSteamAPIProvider: UserManagerProviderProtocol {
     }
   }
 
-  func recentlyPlayedGamesData(with userId: Int, completion: ((UserManagerSteamAPIProvider.JSONObject?, Error?) -> ())?) {
+  func recentlyPlayedGamesData(with userId: Int, completion: (([UserManagerSteamAPIProvider.JSONObject]?, Error?) -> ())?) {
     steamAPI.request(.recentlyPlayedGames(userId: userId), refresh: !cacheEnabled) { (response, error) in
-      completion?(response, error)
+      var games: [JSONObject]?
+      var err: Error?
+      defer {
+        completion?(games, err)
+      }
+      
+      guard error == nil else {
+        err = error
+        return
+      }
+      
+      if
+        let response = response?["response"] as? [String: Any],
+        let gamesArray = response["games"] as? [[String: Any]] {
+        games = gamesArray
+      } else {
+        err = UserManagerSteamAPIProviderError.wrongResponse
+      }
     }
   }
 
